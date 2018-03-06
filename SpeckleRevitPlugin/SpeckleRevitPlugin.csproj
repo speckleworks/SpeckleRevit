@@ -68,12 +68,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SpeckleRevitErrorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SpeckleRevitErrorForm.Designer.cs">
-      <DependentUpon>SpeckleRevitErrorForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="SpeckleRevitPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpeckleRevitForm.cs">
@@ -92,12 +86,23 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SpeckleRevitErrorForm.resx">
-      <DependentUpon>SpeckleRevitErrorForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="SpeckleRevitForm.resx">
       <DependentUpon>SpeckleRevitForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpeckleCore\SpeckleCore\SpeckleCore.csproj">
+      <Project>{cfe27d3d-8a1a-43f9-9387-8fd9e119e174}</Project>
+      <Name>SpeckleCore</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="BeforeBuild">
+    <MakeDir Directories="$(TargetDir)\app\dist" />
+    <Copy SourceFiles="$(SolutionDir)\SpeckleView\index.html" DestinationFolder="$(TargetDir)\app" />
+    <Copy SourceFiles="$(SolutionDir)\SpeckleView\dist\build.js" DestinationFolder="$(TargetDir)\app\dist" />
+  </Target>
+  <Target Name="AfterBuild">
+	<Copy SourceFiles="$(SolutionDir)\SpeckleRevit.addin" DestinationFolder="C:\ProgramData\Autodesk\Revit\Addins\2018" />
+  </Target>
 </Project>

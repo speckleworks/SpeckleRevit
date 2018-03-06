@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Architecture;
+﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
-using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
 using SpeckleRevitTest;
 using CefSharp;
 using System.IO;
 using System.Reflection;
-using System.Diagnostics;
 using CefSharp.WinForms;
 using System.Windows.Forms;
 
@@ -73,6 +65,11 @@ public class SpeckleRevit : IExternalCommand
     public void InitializeChromium()
     {
 
+#if DEBUG
+
+        Browser = new ChromiumWebBrowser(@"http://localhost:9090/");
+
+#else
         var path = Directory.GetParent(Assembly.GetExecutingAssembly().Location);
         Debug.WriteLine(path, "SPK");
 
@@ -83,19 +80,17 @@ public class SpeckleRevit : IExternalCommand
 
         indexPath = indexPath.Replace("\\", "/");
 
-        Browser = new ChromiumWebBrowser(indexPath)
+        Browser = new ChromiumWebBrowser(indexPath);
+#endif
+        // Allow the use of local resources in the browser
+        Browser.BrowserSettings = new BrowserSettings
         {
-
-            // Allow the use of local resources in the browser
-            BrowserSettings = new BrowserSettings
-            {
-                FileAccessFromFileUrls = CefState.Enabled,
-                UniversalAccessFromFileUrls = CefState.Enabled
-            },
-
-
-            Dock = DockStyle.Fill
+            FileAccessFromFileUrls = CefState.Enabled,
+            UniversalAccessFromFileUrls = CefState.Enabled
         };
+
+
+        Browser.Dock = DockStyle.Fill;
     }
 
 }
