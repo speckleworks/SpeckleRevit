@@ -1,6 +1,8 @@
 # SpeckleRevit
 Placeholder for the SpeckleRevit plugin. If you've got the expertise, feel free to dig in! 
 
+![SpeckleRevit](https://user-images.githubusercontent.com/1014562/37059372-8d85e7a8-218d-11e8-9ea6-e8dff5fe81cc.png)
+
 ## About Speckle
 
 Speckle reimagines the design process from the Internet up: an open source (MIT) initiative for developing an extensible Design & AEC data communication protocol and platform. Contributions are welcome - we can't build this alone! 
