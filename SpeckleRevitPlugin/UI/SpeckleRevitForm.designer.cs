@@ -1,4 +1,4 @@
-﻿namespace SpeckleRevitTest
+﻿namespace SpeckleRevitPlugin
 {
     partial class SpeckleRevitForm
     {
