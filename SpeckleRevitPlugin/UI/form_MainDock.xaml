@@ -5,16 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
       Background="White" >
-    <Grid>
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Name="StackMain" Height="1997" Width="2112">
-                <Border x:Name="Border1" Background="White" CornerRadius="5" Margin="5,5,-559.6,5" BorderBrush="Gray" BorderThickness="1" Height="959">
+            <StackPanel Name="StackMain" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Border x:Name="Border1" Background="White" CornerRadius="5" BorderBrush="Gray" BorderThickness="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid Margin="5,5">
-                        <WebBrowser Name="webBrowser" Height="3000" Width="3000"></WebBrowser>
+                        <WebBrowser Name="webBrowser" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></WebBrowser>
 
                     </Grid>
                 </Border>
-
             </StackPanel>
         </ScrollViewer>
     </Grid>

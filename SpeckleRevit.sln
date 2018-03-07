@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeckleCore", "SpeckleCore\SpeckleCore\SpeckleCore.csproj", "{CFE27D3D-8A1A-43F9-9387-8FD9E119E174}"
 EndProject
-Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "SpeckleRhinoView", "SpeckleView\SpeckleRhinoView.njsproj", "{1230185B-4DCF-4DB5-A092-C2BEE97ED0F3}"
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "SpeckleView", "SpeckleView\SpeckleView.njsproj", "{1230185B-4DCF-4DB5-A092-C2BEE97ED0F3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{63ACD802-7B88-4D3B-B8E2-3B36F6936465}"
 	ProjectSection(SolutionItems) = preProject
