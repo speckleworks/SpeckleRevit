@@ -7,74 +7,14 @@
       Background="White" >
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Name="StackMain">
-                <Border x:Name="Border1" Background="White" CornerRadius="5" Margin="5,5" BorderBrush="Gray" BorderThickness="1">
+            <StackPanel Name="StackMain" Height="1997" Width="2112">
+                <Border x:Name="Border1" Background="White" CornerRadius="5" Margin="5,5,-559.6,5" BorderBrush="Gray" BorderThickness="1" Height="959">
                     <Grid Margin="5,5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                        </Grid.RowDefinitions>
-                        <Button Content="Modeless Cmd" Margin="3" Click="Button_ExampleTransaction_Click"/>
+                        <WebBrowser Name="webBrowser" Height="3000" Width="3000"></WebBrowser>
+
                     </Grid>
                 </Border>
-                <Border x:Name="Border2" Background="White" CornerRadius="5" Margin="5,5" BorderBrush="Gray" BorderThickness="1">
-                    <Grid Margin="5,5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="100"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                        </Grid.RowDefinitions>
-                    </Grid>
-                </Border>
-                <Expander Margin="5,5" BorderThickness="1" BorderBrush="Gray" Header="Expander Control 1">
-                    <Grid Margin="5,5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="100"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                        </Grid.RowDefinitions>
-                    </Grid>
-                </Expander>
-                <Expander Margin="5,5" BorderThickness="1" BorderBrush="Gray" Header="Expander Control 2">
-                    <Grid Margin="5,5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="100"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                        </Grid.RowDefinitions>
-                    </Grid>
-                </Expander>
-                <Border x:Name="Border3" Background="White" CornerRadius="5" Margin="5,5" BorderBrush="Gray" BorderThickness="0">
-                    <Grid Margin="5,5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                    </Grid>
-                </Border>
+
             </StackPanel>
         </ScrollViewer>
     </Grid>
