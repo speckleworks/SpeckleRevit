@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region Namespaces
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+#endregion
 
 namespace SpeckleRevitPlugin
 {
@@ -20,9 +22,9 @@ namespace SpeckleRevitPlugin
     /// </summary>
     public partial class form_Main : Window
     {
-        private clsSettings _s;
+        private SettingsHelper _s;
 
-        public form_Main(clsSettings s)
+        public form_Main(SettingsHelper s)
         {
             InitializeComponent();
             Label_Version.Content = "v." + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -31,7 +33,7 @@ namespace SpeckleRevitPlugin
             _s = s;
         }
 
-
+        #region Form Events
         /// <summary>
         /// Close the window
         /// </summary>
@@ -62,5 +64,6 @@ namespace SpeckleRevitPlugin
             if (e.ChangedButton == MouseButton.Left)
                 this.DragMove();
         }
+        #endregion
     }
 }

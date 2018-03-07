@@ -4,7 +4,7 @@
     <Text>Command SpeckleRevitPlugin</Text>
     <Description>Speckle plugin for Revit</Description>
     <Assembly>.\Speckle\SpeckleRevitPlugin.dll</Assembly>
-    <FullClassName>SpeckleRevitPlugin.cmd</FullClassName>
+    <FullClassName>SpeckleRevitPlugin.ExtCmd</FullClassName>
     <ClientId>76028dcb-3f9b-4a5b-9e8b-36b7a5564a56</ClientId>
     <VendorId>Speckle</VendorId>
     <VendorDescription>http://speckle.works/</VendorDescription>
@@ -12,7 +12,7 @@
   <AddIn Type="Application">
     <Name>Application SpeckleRevitPlugin</Name>
     <Assembly>.\Speckle\SpeckleRevitPlugin.dll</Assembly>
-    <FullClassName>SpeckleRevitPlugin.app</FullClassName>
+    <FullClassName>SpeckleRevitPlugin.AppMain</FullClassName>
     <ClientId>0a03f52e-0ee0-4c19-82c4-8181626ec816</ClientId>
     <VendorId>Speckle</VendorId>
     <VendorDescription>http://speckle.works/</VendorDescription>
