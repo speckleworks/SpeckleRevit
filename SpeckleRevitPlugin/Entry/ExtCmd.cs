@@ -12,7 +12,7 @@ using Autodesk.Revit.UI.Selection;
 using CefSharp;
 using System.IO;
 using System.Reflection;
-using CefSharp.WinForms;
+//using CefSharp.WinForms;
 using System.Windows.Forms;
 #endregion
 
@@ -21,7 +21,7 @@ namespace SpeckleRevitPlugin
     [Transaction(TransactionMode.Manual)]
     public class ExtCmd : IExternalCommand
     {
-        public static ChromiumWebBrowser Browser;
+        // public static ChromiumWebBrowser Browser;
 
         public Result Execute(
           ExternalCommandData commandData,
@@ -46,8 +46,8 @@ namespace SpeckleRevitPlugin
 
             var form = new SpeckleRevitForm();
 
-            form.Controls.Add(Browser);
-            form.Show();
+            //form.Controls.Add(Browser);
+            //form.Show();
 
             return Result.Succeeded;
         }
@@ -79,7 +79,7 @@ namespace SpeckleRevitPlugin
 
 #if DEBUG
 
-            Browser = new ChromiumWebBrowser(@"http://localhost:9090/");
+            // Browser = new ChromiumWebBrowser(@"http://localhost:9090/");
 
 #else
         var path = Directory.GetParent(Assembly.GetExecutingAssembly().Location);
@@ -95,14 +95,14 @@ namespace SpeckleRevitPlugin
         Browser = new ChromiumWebBrowser(indexPath);
 #endif
             // Allow the use of local resources in the browser
-            Browser.BrowserSettings = new BrowserSettings
-            {
-                FileAccessFromFileUrls = CefState.Enabled,
-                UniversalAccessFromFileUrls = CefState.Enabled
-            };
+            //Browser.BrowserSettings = new BrowserSettings
+            //{
+            //    FileAccessFromFileUrls = CefState.Enabled,
+            //    UniversalAccessFromFileUrls = CefState.Enabled
+            //};
 
 
-            Browser.Dock = DockStyle.Fill;
+            //Browser.Dock = DockStyle.Fill;
         }
     }
 }
