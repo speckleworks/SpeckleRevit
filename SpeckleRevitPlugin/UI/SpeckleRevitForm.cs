@@ -13,16 +13,13 @@ namespace SpeckleRevitPlugin
 {
     public partial class SpeckleRevitForm : Form
     {
-        private clsSettings _settings;
-
         /// <summary>
         /// Speckle Revit Form
         /// </summary>
         /// <param name="settings"></param>
-        public SpeckleRevitForm(clsSettings settings)
+        public SpeckleRevitForm()
         {
             InitializeComponent();
-            _settings = settings;
         }
     }
 }

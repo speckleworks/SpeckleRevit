@@ -5,22 +5,29 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using Autodesk.Revit.ApplicationServices;
-using Autodesk.Revit.Attributes;
-using Autodesk.Revit.UI;
 using System.Windows.Media.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Windows.Media;
+
+using Autodesk.Revit.ApplicationServices;
+using Autodesk.Revit.Attributes;
+using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Events;
 #endregion
 
 namespace SpeckleRevitPlugin
 {
     [Transaction(TransactionMode.Manual)]
-    class app : IExternalApplication
+    class AppMain : IExternalApplication
     {
         static string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         static UIControlledApplication uiApp;
+        static AppMain _thisApp;
+
+        internal static form_MainDock MainDock;
+        internal DockablePaneProviderData DockData;
+        internal static SettingsHelper Settings { get; set; }
 
         #region Setup
         /// <summary>
@@ -31,8 +38,6 @@ namespace SpeckleRevitPlugin
         /// <remarks></remarks>
         private ImageSource LoadPngImgSource(string SourceName)
         {
-
-
             try
             {
                 // Assembly
@@ -47,8 +52,6 @@ namespace SpeckleRevitPlugin
                 // Source
                 ImageSource m_source = decoder.Frames[0];
                 return (m_source);
-
-
             }
             catch
             {
@@ -78,12 +81,12 @@ namespace SpeckleRevitPlugin
 
             // Tools
             AddButton("Speckle", 
-                    "Connection\r\nTest",
-                    "Connection\r\nTest", 
+                    "Plugin\r\nTest",
+                    "Plugin\r\nTest", 
                     "SpeckleRevitPlugin.Template_16.png", 
                     "SpeckleRevitPlugin.Template_32.png", 
                     (m_Path + "\\SpeckleRevitPlugin.dll"), 
-                    "SpeckleRevitPlugin.cmd", 
+                    "SpeckleRevitPlugin.ExtCmd", 
                     "Speckle connection test for Revit.");
         }
 
@@ -166,6 +169,25 @@ namespace SpeckleRevitPlugin
             {
                 // The Shared uiApp variable
                 uiApp = a;
+                _thisApp = this;
+
+                // Register the dockable pane
+                if (MainDock == null)
+                {
+                    MainDock = new form_MainDock();
+                    DockData = new DockablePaneProviderData
+                    {
+                        FrameworkElement = MainDock,
+                        InitialState = new DockablePaneState
+                        {
+                            DockPosition = DockPosition.Right
+                        }
+                    };
+                }
+                uiApp.RegisterDockablePane(GlobalHelper.MainDockablePaneId, GlobalHelper.MainPanelName(), MainDock as IDockablePaneProvider);
+
+                // Detect when a new model is in focus
+                a.ViewActivated += OnViewActivated;
 
                 // Add the Ribbon Panel!!
                 AddRibbonPanel(a);
@@ -182,6 +204,39 @@ namespace SpeckleRevitPlugin
         public Result OnShutdown(UIControlledApplication a)
         {
             return Result.Succeeded;
+        }
+        #endregion
+
+        #region Internal Members - Events
+        /// <summary>
+        /// View change will detect a model change
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void OnViewActivated(object sender, ViewActivatedEventArgs e)
+        {
+            try
+            {
+                if (Settings == null) Settings = new SettingsHelper(e.Document, null);
+                if (Settings.App == null)
+                {
+                    HideDockablePane();
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Close the Dockable Pane
+        /// </summary>
+        internal void HideDockablePane()
+        {
+            try
+            {
+                DockablePane m_dp = uiApp.GetDockablePane(GlobalHelper.MainDockablePaneId);
+                m_dp.Hide();
+            }
+            catch { }
         }
         #endregion
     }

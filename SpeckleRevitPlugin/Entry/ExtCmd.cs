@@ -19,7 +19,7 @@ using System.Windows.Forms;
 namespace SpeckleRevitPlugin
 {
     [Transaction(TransactionMode.Manual)]
-    public class cmd : IExternalCommand
+    public class ExtCmd : IExternalCommand
     {
         public static ChromiumWebBrowser Browser;
 
@@ -28,6 +28,14 @@ namespace SpeckleRevitPlugin
           ref string message,
           ElementSet elements)
         {
+            // Settings Helper Class
+            // NOTE: You can use the AppMain.Settings throughout project to access active Revit Document, UIDocument, Application, etc.
+            AppMain.Settings = new SettingsHelper(commandData);
+
+            // SHOW DOCKABLE WINDOW
+            //DockablePaneId m_dpID = GlobalHelper.MainDockablePaneId;
+            //DockablePane m_dp = commandData.Application.GetDockablePane(m_dpID);
+            //m_dp.Show();
 
             // initialise cef
             if (!Cef.IsInitialized)
@@ -36,10 +44,7 @@ namespace SpeckleRevitPlugin
             // initialise one browser instance
             InitializeChromium();
 
-            // Revit Settings Helper Class
-            clsSettings settings = new clsSettings(commandData);
-
-            var form = new SpeckleRevitForm(settings);
+            var form = new SpeckleRevitForm();
 
             form.Controls.Add(Browser);
             form.Show();

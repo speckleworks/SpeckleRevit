@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region Namespaces
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,25 +8,38 @@ using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+#endregion
 
 namespace SpeckleRevitPlugin
 {
-    public class clsSettings
+    public class SettingsHelper
     {
         private ExternalCommandData _cmd;
+        private Application _app;
+        private Document _doc;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="cmd"></param>
-        public clsSettings(ExternalCommandData cmd)
+        public SettingsHelper(ExternalCommandData cmd)
         {
-
-            // Widen Scope
+            _doc = null;
             _cmd = cmd;
-
         }
 
+        /// <summary>
+        /// Constructor - from application (events)
+        /// </summary>
+        /// <param name="d"></param>
+        /// <param name="a"></param>
+        public SettingsHelper(Document d, Application a)
+        {
+            _app = a;
+            _doc = d;
+        }
+
+        #region Command Data
         /// <summary>
         /// Revit UI application
         /// </summary>
@@ -77,7 +91,7 @@ namespace SpeckleRevitPlugin
         /// <summary>
         /// Revit Document
         /// </summary>
-        public Document Doc
+        public Document ActiveDoc
         {
             get
             {
@@ -89,5 +103,10 @@ namespace SpeckleRevitPlugin
                 return null;
             }
         }
+        #endregion
+
+        #region Public Properties - Modeless
+        internal EnumCommandType CommandType { get; set; }
+        #endregion
     }
 }
