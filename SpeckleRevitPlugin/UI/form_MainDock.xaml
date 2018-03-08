@@ -7,14 +7,7 @@
       Background="White" >
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Name="StackMain" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <Border x:Name="Border1" Background="White" CornerRadius="5" BorderBrush="Gray" BorderThickness="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                    <Grid Margin="5,5">
-                        <WebBrowser Name="webBrowser" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></WebBrowser>
-
-                    </Grid>
-                </Border>
-            </StackPanel>
+            <WebBrowser Name="webBrowser" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></WebBrowser>
         </ScrollViewer>
     </Grid>
 </Page>

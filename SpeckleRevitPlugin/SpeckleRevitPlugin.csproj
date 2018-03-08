@@ -70,18 +70,19 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\Template_16.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SpeckleRevitPlugin.addin">
       <SubType>Designer</SubType>
     </Content>
-    <EmbeddedResource Include="Template_16.png" />
-    <EmbeddedResource Include="Template_32.png" />
+    <EmbeddedResource Include="Resources\Template_32.png" />
+    <EmbeddedResource Include="Properties\Resources.resx" />
     <EmbeddedResource Include="UI\SpeckleRevitForm.resx">
       <DependentUpon>SpeckleRevitForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resource\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Page Include="UI\form_Main.xaml">
       <SubType>Designer</SubType>
