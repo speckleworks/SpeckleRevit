@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,8 +18,9 @@ using System.Windows.Shapes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
-
+using CefSharp;
 using Visibility = System.Windows.Visibility;
+using Path = System.IO.Path;
 #endregion
 
 namespace SpeckleRevitPlugin
@@ -38,6 +40,8 @@ namespace SpeckleRevitPlugin
         {
             InitializeComponent();
             _extEvent = ExternalEvent.Create(_handler);
+
+            
         }
 
         #region Form Events
@@ -73,5 +77,6 @@ namespace SpeckleRevitPlugin
             data.InitialState.DockPosition = DockPosition.Right;
         }
         #endregion
+
     }
 }
