@@ -3,14 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             
              mc:Ignorable="d" 
       Background="White" >
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-       <!-- <cefSharp:ChromiumWebBrowser Grid.Row="0" x:Name="Browser" Address="http://www.google.com" /> -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Name="StackMain" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Border x:Name="Border1" Background="White" CornerRadius="5" BorderBrush="Gray" BorderThickness="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Grid Margin="5,5">
+                        <WebBrowser Name="webBrowser" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></WebBrowser>
+
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

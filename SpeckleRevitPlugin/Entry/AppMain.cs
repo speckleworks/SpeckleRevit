@@ -83,8 +83,8 @@ namespace SpeckleRevitPlugin
             AddButton("Speckle", 
                     "Plugin\r\nTest",
                     "Plugin\r\nTest", 
-                    "SpeckleRevitPlugin.Resource.Template_16.png",
-                    "SpeckleRevitPlugin.Resource.Template_32.png", 
+                    "SpeckleRevitPlugin.Template_16.png", 
+                    "SpeckleRevitPlugin.Template_32.png", 
                     (m_Path + "\\SpeckleRevitPlugin.dll"), 
                     "SpeckleRevitPlugin.ExtCmd", 
                     "Speckle connection test for Revit.");
@@ -111,9 +111,9 @@ namespace SpeckleRevitPlugin
                 RibbonPanel ribbonPanel = null;
 
                 // Find the Panel within the Case Tab
-                var rp = new List<RibbonPanel>();
+                List<RibbonPanel> rp = new List<RibbonPanel>();
                 rp = uiApp.GetRibbonPanels("Speckle");
-                foreach (var x in rp)
+                foreach (RibbonPanel x in rp)
                 {
                     if (x.Name.ToUpper() == Rpanel.ToUpper())
                     {
@@ -128,7 +128,7 @@ namespace SpeckleRevitPlugin
                 }
 
                 // Create the Pushbutton Data
-                var pushButtonData = new PushButtonData(ButtonName, ButtonText, dllPath, dllClass);
+                PushButtonData pushButtonData = new PushButtonData(ButtonName, ButtonText, dllPath, dllClass);
                 if (!string.IsNullOrEmpty(ImagePath16))
                 {
                     try
@@ -152,7 +152,7 @@ namespace SpeckleRevitPlugin
                 pushButtonData.ToolTip = Tooltip;
 
                 // Add the button to the tab
-                var pushButtonDataAdd = (PushButton)ribbonPanel.AddItem(pushButtonData);
+                PushButton pushButtonDataAdd = (PushButton)ribbonPanel.AddItem(pushButtonData);
             }
             catch
             {
@@ -203,7 +203,6 @@ namespace SpeckleRevitPlugin
         #region Shutdown
         public Result OnShutdown(UIControlledApplication a)
         {
-      
             return Result.Succeeded;
         }
         #endregion
