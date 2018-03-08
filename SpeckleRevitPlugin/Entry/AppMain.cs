@@ -83,8 +83,8 @@ namespace SpeckleRevitPlugin
             AddButton("Speckle", 
                     "Plugin\r\nTest",
                     "Plugin\r\nTest", 
-                    "SpeckleRevitPlugin.Template_16.png", 
-                    "SpeckleRevitPlugin.Template_32.png", 
+                    "SpeckleRevitPlugin.Resources.Template_16.png", 
+                    "SpeckleRevitPlugin.Resources.Template_32.png", 
                     (m_Path + "\\SpeckleRevitPlugin.dll"), 
                     "SpeckleRevitPlugin.ExtCmd", 
                     "Speckle connection test for Revit.");
@@ -137,6 +137,7 @@ namespace SpeckleRevitPlugin
                     }
                     catch
                     {
+                        Debug.WriteLine("Image not found", "SPK");
                     }
                 }
                 if (!string.IsNullOrEmpty(ImagePath32))
@@ -147,6 +148,7 @@ namespace SpeckleRevitPlugin
                     }
                     catch
                     {
+                        Debug.WriteLine("Image not found", "SPK");
                     }
                 }
                 pushButtonData.ToolTip = Tooltip;
