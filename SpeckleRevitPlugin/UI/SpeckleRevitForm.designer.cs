@@ -37,6 +37,7 @@
             this.ClientSize = new System.Drawing.Size(974, 229);
             this.Name = "SpeckleRevitForm";
             this.Text = "SpeckleRevitForm";
+            this.TopMost = true;
             this.ResumeLayout(false);
 
         }

@@ -70,9 +70,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\Template_16.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="Resources\Template_16.png" />
     <Content Include="SpeckleRevitPlugin.addin">
       <SubType>Designer</SubType>
     </Content>
@@ -94,6 +92,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CefSharp.WinForms">
+      <Version>63.0.2</Version>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>11.0.1</Version>
     </PackageReference>

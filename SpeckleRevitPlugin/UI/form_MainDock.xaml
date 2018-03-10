@@ -6,6 +6,7 @@
              mc:Ignorable="d" 
       Background="White" >
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <WebBrowser Name="webBrowser" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></WebBrowser>
         </ScrollViewer>
