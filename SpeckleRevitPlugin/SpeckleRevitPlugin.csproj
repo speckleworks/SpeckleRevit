@@ -62,12 +62,6 @@
     <Compile Include="UI\form_MainDock.xaml.cs">
       <DependentUpon>form_MainDock.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\SpeckleRevitForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\SpeckleRevitForm.designer.cs">
-      <DependentUpon>SpeckleRevitForm.cs</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Template_16.png" />
@@ -76,11 +70,18 @@
     </Content>
     <EmbeddedResource Include="Resources\Template_32.png" />
     <EmbeddedResource Include="Properties\Resources.resx" />
-    <EmbeddedResource Include="UI\SpeckleRevitForm.resx">
-      <DependentUpon>SpeckleRevitForm.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="CefSharp.Wpf">
+      <Version>63.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>11.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Revit-2018.1-x64.Base">
+      <Version>1.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <ItemGroup>
     <Page Include="UI\form_Main.xaml">
       <SubType>Designer</SubType>
@@ -90,17 +91,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="CefSharp.WinForms">
-      <Version>63.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>11.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="Revit-2018.1-x64.Base" IncludeAssets="build;compile">
-      <Version>1.0.0</Version>
-    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
