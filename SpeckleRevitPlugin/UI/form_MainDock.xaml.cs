@@ -23,6 +23,7 @@ using Visibility = System.Windows.Visibility;
 using Path = System.IO.Path;
 using System.IO;
 using System.Diagnostics;
+using SpeckleRevit;
 #endregion
 
 namespace SpeckleRevitPlugin
@@ -34,6 +35,8 @@ namespace SpeckleRevitPlugin
     {
         private ExternalEvent _extEvent;
         private ExtCmdModeless _handler = new ExtCmdModeless();
+
+        public static Interop Store;
 
         /// <summary>
         /// Main Dockable window

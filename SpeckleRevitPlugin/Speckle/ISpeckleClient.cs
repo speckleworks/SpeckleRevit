@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 
 
-namespace SpeckleRhino
+namespace SpeckleRevit
 {
     /// <summary>
     /// Generalises some methhods for both senders and receivers.
