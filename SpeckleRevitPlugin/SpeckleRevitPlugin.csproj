@@ -51,7 +51,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\GlobalHelper.cs" />
+    <Compile Include="Classes\Interop.cs" />
+    <Compile Include="Classes\ISpeckleRevitClient.cs" />
     <Compile Include="Classes\SettingsHelper.cs" />
+    <Compile Include="Classes\SpeckleAccount.cs" />
+    <Compile Include="Classes\RevitReceiver.cs" />
+    <Compile Include="Classes\SpeckleRhinoSender.cs" />
     <Compile Include="Entry\ExtCmd.cs" />
     <Compile Include="Entry\AppMain.cs" />
     <Compile Include="Entry\ExtCmdModeless.cs" />
@@ -73,7 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CefSharp.Wpf">
-      <Version>63.0.2</Version>
+      <Version>63.0.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>11.0.1</Version>
@@ -91,6 +96,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpeckleCore\SpeckleCore\SpeckleCore.csproj">
+      <Project>{cfe27d3d-8a1a-43f9-9387-8fd9e119e174}</Project>
+      <Name>SpeckleCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -14,6 +14,8 @@ using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
+using SpeckleRevitPlugin.UI;
+
 #endregion
 
 namespace SpeckleRevitPlugin
@@ -25,7 +27,7 @@ namespace SpeckleRevitPlugin
         static UIControlledApplication uiApp;
         static AppMain _thisApp;
 
-        internal static form_MainDock MainDock;
+        internal static FormMainDock MainDock;
         internal DockablePaneProviderData DockData;
         internal static SettingsHelper Settings { get; set; }
 
@@ -176,7 +178,7 @@ namespace SpeckleRevitPlugin
                 // Register the dockable pane
                 if (MainDock == null)
                 {
-                    MainDock = new form_MainDock();
+                    MainDock = new FormMainDock();
                     DockData = new DockablePaneProviderData
                     {
                         FrameworkElement = MainDock,
@@ -186,7 +188,9 @@ namespace SpeckleRevitPlugin
                         }
                     };
                 }
-                uiApp.RegisterDockablePane(GlobalHelper.MainDockablePaneId, GlobalHelper.MainPanelName(), MainDock as IDockablePaneProvider);
+
+                uiApp.RegisterDockablePane(GlobalHelper.MainDockablePaneId, GlobalHelper.MainPanelName(),
+                    MainDock as IDockablePaneProvider);
 
                 // Detect when a new model is in focus
                 a.ViewActivated += OnViewActivated;
@@ -198,7 +202,10 @@ namespace SpeckleRevitPlugin
                 return Result.Succeeded;
 
             }
-            catch { return Result.Failed; }
+            catch (Exception e)
+            {
+                return Result.Failed;
+            }
         }
         #endregion
 
