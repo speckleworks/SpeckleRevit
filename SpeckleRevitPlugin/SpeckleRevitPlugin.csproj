@@ -66,6 +66,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Tools\WallTool\SpeckleWallCmd.cs" />
     <Compile Include="UI\form_Main.xaml.cs">
       <DependentUpon>form_Main.xaml</DependentUpon>
     </Compile>

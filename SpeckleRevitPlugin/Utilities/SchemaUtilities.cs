@@ -1,20 +1,20 @@
-﻿using System;
+﻿#region Namespaces
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.ExtensibleStorage;
+#endregion
 
 namespace SpeckleRevitPlugin.Utilities
 {
     public static class SchemaUtilities
     {
         /// <summary>
-        /// 
+        /// Retrieves Schema by its name.
         /// </summary>
-        /// <param name="schemaName"></param>
+        /// <param name="schemaName">Schema name.</param>
         /// <returns></returns>
         public static Schema GetSchema(string schemaName)
         {
@@ -24,15 +24,19 @@ namespace SpeckleRevitPlugin.Utilities
         }
 
         /// <summary>
-        /// 
+        /// Checks if Schema exists in Document.
         /// </summary>
-        /// <param name="schemaName"></param>
+        /// <param name="schemaName">Schema name.</param>
         /// <returns></returns>
         public static bool SchemaExist(string schemaName)
         {
             return GetSchema(schemaName) != null;
         }
 
+        /// <summary>
+        /// Creates Speckle Schema.
+        /// </summary>
+        /// <returns></returns>
         public static Schema CreateSchema()
         {
             var schemaGuid = new Guid(Properties.Resources.SchemaId);
@@ -53,9 +57,16 @@ namespace SpeckleRevitPlugin.Utilities
             return schema;
         }
 
-        public static void AddSchemaEntity(Schema schema, Element e, string fieldName, Dictionary<string, string> fieldValue)
+        /// <summary>
+        /// Adds new Speckle Schema Entity to Element.
+        /// </summary>
+        /// <param name="s">Schema</param>
+        /// <param name="e">Element</param>
+        /// <param name="fName">Filed name</param>
+        /// <param name="fValue">Field value</param>
+        public static void AddSchemaEntity(Schema s, Element e, string fName, Dictionary<string, string> fValue)
         {
-            if (schema == null)
+            if (s == null)
             {
                 throw new NullReferenceException("schema");
             }
@@ -63,16 +74,16 @@ namespace SpeckleRevitPlugin.Utilities
             {
                 throw new NullReferenceException("element");
             }
-            if (string.IsNullOrEmpty(fieldName))
+            if (string.IsNullOrEmpty(fName))
             {
                 throw new NullReferenceException("fieldName");
             }
 
             try
             {
-                var entity = new Entity(schema);
-                var settingsField = schema.GetField(fieldName);
-                entity.Set<IDictionary<string, string>>(settingsField, fieldValue);
+                var entity = new Entity(s);
+                var settingsField = s.GetField(fName);
+                entity.Set<IDictionary<string, string>>(settingsField, fValue);
 
                 e.SetEntity(entity);
             }
@@ -83,9 +94,10 @@ namespace SpeckleRevitPlugin.Utilities
         }
 
         /// <summary>
-        /// 
+        /// Speckle Schema will always be stored on this Element,
+        /// so now we have a utility to get to it faster.
         /// </summary>
-        /// <param name="doc"></param>
+        /// <param name="doc">Revit Document</param>
         /// <returns></returns>
         public static Element GetProjectInfo(Document doc)
         {
@@ -95,9 +107,16 @@ namespace SpeckleRevitPlugin.Utilities
             return pInfo;
         }
 
-        public static void UpdateSchemaEntity(Schema schema, Element e, string fieldName, Dictionary<string, string> fieldValue)
+        /// <summary>
+        /// Updates existing Speckle Schema Entity on given Element.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="e"></param>
+        /// <param name="fName"></param>
+        /// <param name="fValue"></param>
+        public static void UpdateSchemaEntity(Schema s, Element e, string fName, Dictionary<string, string> fValue)
         {
-            if (schema == null)
+            if (s == null)
             {
                 throw new NullReferenceException("schema");
             }
@@ -105,16 +124,16 @@ namespace SpeckleRevitPlugin.Utilities
             {
                 throw new NullReferenceException("element");
             }
-            if (string.IsNullOrEmpty(fieldName))
+            if (string.IsNullOrEmpty(fName))
             {
                 throw new NullReferenceException("fieldName");
             }
 
             try
             {
-                var entity = e.GetEntity(schema);
-                var field = schema.GetField(fieldName);
-                entity.Set<IDictionary<string, string>>(field, fieldValue);
+                var entity = e.GetEntity(s);
+                var field = s.GetField(fName);
+                entity.Set<IDictionary<string, string>>(field, fValue);
 
                 e.SetEntity(entity);
             }

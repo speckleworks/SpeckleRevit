@@ -1,17 +1,17 @@
 ﻿#region Namespaces
-using System.Collections.Generic;
+
+using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
-using SpeckleRevitPlugin.Classes;
 using SpeckleRevitPlugin.UI;
-using SpeckleRevitPlugin.Utilities;
+
 #endregion
 
 namespace SpeckleRevitPlugin.Entry
@@ -117,7 +117,7 @@ namespace SpeckleRevitPlugin.Entry
             return Result.Succeeded;
         }
 
-        #region Utilities
+        #region Ribbon Utilities
 
         /// <summary>
         /// Load an Image Source from File
@@ -125,7 +125,7 @@ namespace SpeckleRevitPlugin.Entry
         /// <param name="SourceName"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        private ImageSource LoadPngImgSource(string SourceName)
+        private static ImageSource LoadPngImgSource(string SourceName)
         {
             try
             {
@@ -159,7 +159,6 @@ namespace SpeckleRevitPlugin.Entry
         {
             try
             {
-                // First Create the Tab
                 a.CreateRibbonTab("Speckle");
             }
             catch
@@ -169,77 +168,74 @@ namespace SpeckleRevitPlugin.Entry
 
             // Tools
             AddButton("Speckle",
-                    "Plugin\r\nTest",
-                    "Plugin\r\nTest",
+                    "Show\r\nSpeckle",
+                    "Show\r\nSpeckle",
                     "SpeckleRevitPlugin.Resources.Template_16.png",
                     "SpeckleRevitPlugin.Resources.Template_32.png",
                     (m_Path + "\\SpeckleRevitPlugin.dll"),
                     "SpeckleRevitPlugin.Entry.ExtCmd",
                     "Speckle connection test for Revit.");
+
+            AddButton("Tools",
+                "Speckle\r\nWall",
+                "Speckle\r\nWall",
+                "SpeckleRevitPlugin.Resources.Template_16.png",
+                "SpeckleRevitPlugin.Resources.Template_32.png",
+                (m_Path + "\\SpeckleRevitPlugin.dll"),
+                "SpeckleRevitPlugin.Entry.SpeckleWallCmd",
+                "Make Walls in Revit using Speckle Streams.");
         }
 
         /// <summary>
         /// Add a button to a Ribbon Tab
         /// </summary>
-        /// <param name="Rpanel">The name of the ribbon panel</param>
-        /// <param name="ButtonName">The Name of the Button</param>
-        /// <param name="ButtonText">Command Text</param>
-        /// <param name="ImagePath16">Small Image</param>
-        /// <param name="ImagePath32">Large Image</param>
+        /// <param name="panel">The name of the ribbon panel</param>
+        /// <param name="bName">The Name of the Button</param>
+        /// <param name="bText">Command Text</param>
+        /// <param name="iPath16">Small Image</param>
+        /// <param name="iPath32">Large Image</param>
         /// <param name="dllPath">Path to the DLL file</param>
         /// <param name="dllClass">Full qualified class descriptor</param>
-        /// <param name="Tooltip">Tooltip to add to the button</param>
+        /// <param name="tooltip">Tooltip to add to the button</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        private bool AddButton(string Rpanel, string ButtonName, string ButtonText, string ImagePath16, string ImagePath32, string dllPath, string dllClass, string Tooltip)
+        private void AddButton(string panel, 
+            string bName, string bText, string iPath16, string iPath32, 
+            string dllPath, string dllClass, string tooltip)
         {
             try
             {
-                // The Ribbon Panel
-                RibbonPanel ribbonPanel = null;
-
-                // Find the Panel within the Case Tab
-                var rp = new List<RibbonPanel>();
-                rp = uiApp.GetRibbonPanels("Speckle");
-                foreach (RibbonPanel x in rp)
-                {
-                    if (x.Name.ToUpper() == Rpanel.ToUpper())
-                    {
-                        ribbonPanel = x;
-                    }
-                }
-
                 // Create the Panel if it doesn't Exist
-                if (ribbonPanel == null)
-                {
-                    ribbonPanel = uiApp.CreateRibbonPanel("Speckle", Rpanel);
-                }
+                var ribbonPanel =
+                    uiApp.GetRibbonPanels("Speckle").FirstOrDefault(x =>
+                        string.Equals(x.Name, panel, StringComparison.OrdinalIgnoreCase)) ??
+                    uiApp.CreateRibbonPanel("Speckle", panel);
 
                 // Create the Pushbutton Data
-                var pushButtonData = new PushButtonData(ButtonName, ButtonText, dllPath, dllClass);
-                if (!string.IsNullOrEmpty(ImagePath16))
+                var pushButtonData = new PushButtonData(bName, bText, dllPath, dllClass);
+                if (!string.IsNullOrEmpty(iPath16))
                 {
                     try
                     {
-                        pushButtonData.Image = LoadPngImgSource(ImagePath16);
+                        pushButtonData.Image = LoadPngImgSource(iPath16);
                     }
                     catch
                     {
                         Debug.WriteLine("Image not found", "SPK");
                     }
                 }
-                if (!string.IsNullOrEmpty(ImagePath32))
+                if (!string.IsNullOrEmpty(iPath32))
                 {
                     try
                     {
-                        pushButtonData.LargeImage = LoadPngImgSource(ImagePath32);
+                        pushButtonData.LargeImage = LoadPngImgSource(iPath32);
                     }
                     catch
                     {
                         Debug.WriteLine("Image not found", "SPK");
                     }
                 }
-                pushButtonData.ToolTip = Tooltip;
+                pushButtonData.ToolTip = tooltip;
 
                 // Add the button to the tab
                 var unused = (PushButton)ribbonPanel.AddItem(pushButtonData);
@@ -248,7 +244,6 @@ namespace SpeckleRevitPlugin.Entry
             {
                 // ignored
             }
-            return true;
         }
 
         /// <summary>

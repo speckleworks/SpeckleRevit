@@ -5,7 +5,7 @@ using SpeckleCore;
 namespace SpeckleRevitPlugin.Classes
 {
     /// <summary>
-    /// Generalises some methhods for both senders and receivers.
+    /// Generalises some methods for both senders and receivers.
     /// </summary>
     public interface ISpeckleRevitClient : IDisposable, ISerializable
     {

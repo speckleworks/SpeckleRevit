@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SpeckleCore;
 using SpeckleRevitPlugin.Utilities;
+#pragma warning disable 4014
 #endregion
 
 namespace SpeckleRevitPlugin.Classes
@@ -31,7 +32,7 @@ namespace SpeckleRevitPlugin.Classes
         {
         }
 
-        public RevitReceiver( string payload, Interop parent )
+        public RevitReceiver(string payload, Interop parent)
         {
             Context = parent;
             dynamic p = JsonConvert.DeserializeObject(payload);
@@ -51,6 +52,35 @@ namespace SpeckleRevitPlugin.Classes
                 (string) p.account.apiToken);
 
             Objects = new List<SpeckleObject>();
+        }
+
+        protected RevitReceiver(SerializationInfo info, StreamingContext context)
+        {
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
+            Objects = new List<SpeckleObject>();
+
+            var serialisedClient = Convert.FromBase64String(info.GetString("client"));
+
+            using (var ms = new MemoryStream())
+            {
+                ms.Write(serialisedClient, 0, serialisedClient.Length);
+                ms.Seek(0, SeekOrigin.Begin);
+                var bf = new BinaryFormatter
+                {
+                    Binder = new SearchAssembliesBinder(Assembly.GetExecutingAssembly(), true)
+                };
+                Client = (SpeckleApiClient)bf.Deserialize(ms);
+                StreamId = Client.StreamId;
+            }
+
+            Client.OnReady += Client_OnReady;
+            Client.OnLogData += Client_OnLogData;
+            Client.OnWsMessage += Client_OnWsMessage;
+            Client.OnError += Client_OnError;
         }
 
         public string GetClientId()
@@ -251,51 +281,14 @@ namespace SpeckleRevitPlugin.Classes
 
         #region Serialisation & Dispose
 
-        public void Dispose(bool delete = false)
-        {
-            Client.Dispose(delete);
-        }
-
         public void Dispose()
         {
             Client.Dispose();
         }
 
-        public void CompleteDeserialisation(Interop _Context)
+        public void Dispose(bool delete = false)
         {
-            Context = _Context;
-
-            Context.NotifySpeckleFrame("client-add", StreamId, JsonConvert.SerializeObject(new { stream = Client.Stream, client = Client }));
-            Context.UserClients.Add(this);
-        }
-
-        protected RevitReceiver(SerializationInfo info, StreamingContext context)
-        {
-            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
-
-            Objects = new List<SpeckleObject>();
-
-            var serialisedClient = Convert.FromBase64String(info.GetString("client"));
-
-            using (var ms = new MemoryStream())
-            {
-                ms.Write(serialisedClient, 0, serialisedClient.Length);
-                ms.Seek(0, SeekOrigin.Begin);
-                var bf = new BinaryFormatter
-                {
-                    Binder = new SearchAssembliesBinder(Assembly.GetExecutingAssembly(), true)
-                };
-                Client = (SpeckleApiClient)bf.Deserialize(ms);
-                StreamId = Client.StreamId;
-            }
-
-            Client.OnReady += Client_OnReady;
-            Client.OnLogData += Client_OnLogData;
-            Client.OnWsMessage += Client_OnWsMessage;
-            Client.OnError += Client_OnError;
+            Client.Dispose(delete);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)

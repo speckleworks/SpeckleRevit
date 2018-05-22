@@ -172,26 +172,23 @@ namespace SpeckleRevitPlugin.Classes
         /// <param name="senders">Dictionary of Revit Senders serialized into string.</param>
         private void OnClientsRetrieved(IDictionary<string, string> receivers, IDictionary<string, string> senders)
         {
-            UserClients = new List<ISpeckleRevitClient>();
-
             var assembly = Assembly.GetExecutingAssembly();
             foreach (var kv in receivers)
             {
                 var serialisedClient = Convert.FromBase64String(kv.Value);
                 var client = BinaryFormatterUtilities.Read<RevitReceiver>(serialisedClient, assembly);
-                if (client.Client == null) return;
-
-                client.CompleteDeserialisation(this);
+                client.Context = this;
             }
 
-            foreach (var kv in senders)
-            {
-                var serialisedClient = Convert.FromBase64String(kv.Value);
-                var client = BinaryFormatterUtilities.Read<RevitSender>(serialisedClient, assembly);
-                if (client.Client == null) return;
+            //TODO: Let's deal with senders later!
+            //foreach (var kv in senders)
+            //{
+            //    var serialisedClient = Convert.FromBase64String(kv.Value);
+            //    var client = BinaryFormatterUtilities.Read<RevitSender>(serialisedClient, assembly);
+            //    if (client.Client == null) return;
 
-                client.CompleteDeserialisation(this);
-            }
+            //    client.CompleteDeserialisation(this);
+            //}
         }
 
         /// <summary>
@@ -248,17 +245,19 @@ namespace SpeckleRevitPlugin.Classes
         //  return true;
         //}
 
-        //public bool RemoveClient( string _payload )
-        //{
-        //  var myClient = UserClients.FirstOrDefault( client => client.GetClientId() == _payload );
-        //  if ( myClient == null ) return false;
+        public bool RemoveClient(string _payload)
+        {
+            var myClient = UserClients.FirstOrDefault(client => client.GetClientId() == _payload);
+            if (myClient == null) return false;
 
-        //  RhinoDoc.ActiveDoc.Strings.Delete( myClient.GetRole() == ClientRole.Receiver ? "speckle-client-receivers" : "speckle-client-senders", myClient.GetClientId() );
+            myClient.Dispose(true);
+            var result = UserClients.Remove(myClient);
 
-        //  myClient.Dispose( true );
+            // (Konrad) Update Revit Schema.
+            SaveFileClients();
 
-        //  return UserClients.Remove( myClient );
-        //}
+            return result;
+        }
 
         public bool RemoveAllClients( )
         {

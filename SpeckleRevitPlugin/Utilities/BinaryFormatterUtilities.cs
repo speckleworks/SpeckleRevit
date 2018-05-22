@@ -1,9 +1,11 @@
-﻿using System;
+﻿#region Namespaces
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+#endregion
 
 namespace SpeckleRevitPlugin.Utilities
 {
@@ -62,12 +64,14 @@ namespace SpeckleRevitPlugin.Utilities
 
         public override Type BindToType(string assemblyName, string typeName)
         {
-            var assemblyNames = new List<AssemblyName>();
-            assemblyNames.Add(_currentAssembly.GetName()); // EXE
+            var assemblyNames = new List<AssemblyName>
+            {
+                _currentAssembly.GetName()
+            };
 
             if (_searchInDlls)
             {
-                assemblyNames.AddRange(_currentAssembly.GetReferencedAssemblies()); // DLLs
+                assemblyNames.AddRange(_currentAssembly.GetReferencedAssemblies());
             }
 
             foreach (var an in assemblyNames)
