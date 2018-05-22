@@ -7,6 +7,8 @@ using System.Windows;
 using Autodesk.Revit.UI;
 using CefSharp;
 using SpeckleRevitPlugin.Classes;
+using SpeckleRevitPlugin.Entry;
+
 #endregion
 
 namespace SpeckleRevitPlugin.UI
@@ -16,8 +18,6 @@ namespace SpeckleRevitPlugin.UI
     /// </summary>
     public partial class FormMainDock : IDockablePaneProvider
     {
-        private readonly ExternalEvent _extEvent;
-        private readonly ExtCmdModeless _handler = new ExtCmdModeless();
         public static Interop Store;
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace SpeckleRevitPlugin.UI
             // make them talk together
             Browser.RegisterAsyncJsObject("Interop", Store);
 
-            _extEvent = ExternalEvent.Create(_handler);
+            //_extEvent = ExternalEvent.Create(_handler);
         }
 
         private static void InitializeCef()
@@ -113,10 +113,10 @@ namespace SpeckleRevitPlugin.UI
             try
             {
                 //textBox_Comments.Text;
-                AppMain.Settings.CommandType = EnumCommandType.Command1;
+                //AppMain.Settings.CommandType = EnumCommandType.Command1;
 
                 // Safe Update
-                _extEvent.Raise();
+                //_extEvent.Raise();
             }
             catch (Exception e)
             {

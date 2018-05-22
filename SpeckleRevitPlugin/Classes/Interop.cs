@@ -4,11 +4,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
+using Autodesk.Revit.DB;
 using CefSharp;
 using CefSharp.Wpf;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SpeckleCore;
+using SpeckleRevitPlugin.Entry;
+using SpeckleRevitPlugin.Utilities;
 #endregion
 
 namespace SpeckleRevitPlugin.Classes
@@ -21,38 +26,97 @@ namespace SpeckleRevitPlugin.Classes
     public class Interop : IDisposable
     {
         private List<SpeckleAccount> _userAccounts;
-        public ChromiumWebBrowser Browser;
         public List<ISpeckleRevitClient> UserClients;
         public Dictionary<string, SpeckleObject> SpeckleObjectCache;
+        public ChromiumWebBrowser Browser;
         public bool SpeckleIsReady;
         public bool SelectionInfoNeedsToBeSentYeMighty = false; // should be false
 
         public Interop(ChromiumWebBrowser originalBrowser)
         {
-            // Makes sure we always get some camelCaseLove
+            // (Luis) Makes sure we always get some camelCaseLove
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings()
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             };
 
-            Browser = originalBrowser;
-            UserClients = new List<ISpeckleRevitClient>();
             _userAccounts = new List<SpeckleAccount>();
+            UserClients = new List<ISpeckleRevitClient>();
             SpeckleObjectCache = new Dictionary<string, SpeckleObject>();
+            Browser = originalBrowser;
             ReadUserAccounts();
+
+            AppMain.OnModelSynched += Revit_ModelSynched;
+            SpeckleRequestHandler.OnClientsRetrieved += OnClientsRetrieved;
         }
 
-        public void SetBrowser( ChromiumWebBrowser browser )
+        private void OnClientsRetrieved(IDictionary<string, string> recivers, IDictionary<string, string> senders)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            foreach (var kv in recivers)
+            {
+                var serialisedClient = Convert.FromBase64String(kv.Value);
+                var client = BinaryFormatterUtilities.Read<RevitReceiver>(serialisedClient, assembly);
+                if (client.Client == null) return;
+
+                client.CompleteDeserialisation(this);
+
+
+                //using (var ms = new MemoryStream())
+                //{
+                //    ms.Write(serialisedClient, 0, serialisedClient.Length);
+                //    ms.Seek(0, SeekOrigin.Begin);
+                //    var bf = new BinaryFormatter
+                //    {
+                //        Binder = new SearchAssembliesBinder(Assembly.GetExecutingAssembly(), true)
+                //    };
+                //    var client = (RevitReceiver)bf.Deserialize(ms);
+                //    client.CompleteDeserialisation(this);
+                //}
+            }
+
+            foreach (var kv in senders)
+            {
+                var serialisedClient = Convert.FromBase64String(kv.Value);
+                var client = BinaryFormatterUtilities.Read<RevitSender>(serialisedClient, assembly);
+                if (client.Client == null) return;
+
+                client.CompleteDeserialisation(this);
+                //var serialisedClient = Convert.FromBase64String(kv.Value);
+
+                //using (var ms = new MemoryStream())
+                //{
+                //    ms.Write(serialisedClient, 0, serialisedClient.Length);
+                //    ms.Seek(0, SeekOrigin.Begin);
+                //    var bf = new BinaryFormatter
+                //    {
+                //        Binder = new SearchAssembliesBinder(Assembly.GetExecutingAssembly(), true)
+                //    };
+                //    var client = (RevitSender)bf.Deserialize(ms);
+                //    client.CompleteDeserialisation(this);
+                //}
+            }
+        }
+
+        private void Revit_ModelSynched(Document doc)
+        {
+            SaveFileClients(doc);
+        }
+
+        public void SetBrowser(ChromiumWebBrowser browser)
         {
             Browser = browser;
         }
 
-        public void Dispose( )
+        public void Dispose()
         {
             RemoveAllClients();
+
+            AppMain.OnModelSynched -= Revit_ModelSynched;
+            SpeckleRequestHandler.OnClientsRetrieved += OnClientsRetrieved;
         }
 
-        public void ShowDev( )
+        public void ShowDev()
         {
             Browser.ShowDevTools();
         }
@@ -75,68 +139,70 @@ namespace SpeckleRevitPlugin.Classes
         /// Do not call this from the constructor as you'll get confilcts with 
         /// browser load, etc.
         /// </summary>
-        public void AppReady( )
+        public void AppReady()
         {
             SpeckleIsReady = true;
-            InstantiateFileClients();
+
+            // (Konrad) This is the thread safe way of interacting with Revit. 
+            // Also it's possible that the Speckle app initiates before Revit
+            // Document is open/ready making Extensible Storage inaccessible.
+            AppMain.SpeckleHandler.Request.Make(SpeckleCommandType.GetClients);
+            AppMain.SpeckleEvent.Raise();
         }
 
-        //TODO: This is called when document is saved. In Revit that would be either document save or synch events.
-        //public void SaveFileClients( )
-        //{
-        //  RhinoDoc myDoc = RhinoDoc.ActiveDoc;
-        //  foreach ( ISpeckleRhinoClient rhinoClient in UserClients )
-        //  {
-        //    using ( var ms = new MemoryStream() )
-        //    {
-        //      var formatter = new BinaryFormatter();
-        //      formatter.Serialize( ms, rhinoClient );
-        //      string section = rhinoClient.GetRole() == ClientRole.Receiver ? "speckle-client-receivers" : "speckle-client-senders";
-        //      var client = Convert.ToBase64String( ms.ToArray() );
-        //      var clientId = rhinoClient.GetClientId();
-        //      RhinoDoc.ActiveDoc.Strings.SetString( section, clientId, client );
-        //    }
-        //  }
-        //}
-
-        public void InstantiateFileClients()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="doc"></param>
+        public void SaveFileClients(Document doc)
         {
-            //TODO: these can be stored in a extensible storage schema and then de-serialized here!
-            //if (!SpeckleIsReady) return;
+            var senders = new Dictionary<string, string>();
+            var receivers = new Dictionary<string, string>();
+            foreach (var rClient in UserClients)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    var formatter = new BinaryFormatter();
+                    formatter.Serialize(ms, rClient);
+                    var client = Convert.ToBase64String(ms.ToArray());
+                    var clientId = rClient.GetClientId();
 
-            //Debug.WriteLine("Instantiate file clients.");
+                    if (rClient.GetRole() == ClientRole.Receiver) receivers.Add(clientId, client);
+                    else senders.Add(clientId, client);
+                }
+            }
 
-            //string[] receiverKeys = RhinoDoc.ActiveDoc.Strings.GetEntryNames("speckle-client-receivers");
+            var pInfo = SchemaUtilities.GetProjectInfo(doc);
+            var schemaExists = SchemaUtilities.SchemaExist(Properties.Resources.SchemaName);
+            var schema = schemaExists 
+                ? SchemaUtilities.GetSchema(Properties.Resources.SchemaName) 
+                : SchemaUtilities.CreateSchema();
 
-            //foreach (string rec in receiverKeys)
-            //{
-            //    //if ( UserClients.Any( cl => cl.GetClientId() == rec ) )
-            //    //  continue;
+            using (var trans = new Transaction(doc, "Store Clients"))
+            {
+                trans.Start();
 
-            //    byte[] serialisedClient = Convert.FromBase64String(RhinoDoc.ActiveDoc.Strings.GetValue("speckle-client-receivers", rec));
-            //    using (var ms = new MemoryStream())
-            //    {
-            //        ms.Write(serialisedClient, 0, serialisedClient.Length);
-            //        ms.Seek(0, SeekOrigin.Begin);
-            //        RhinoReceiver client = (RhinoReceiver)new BinaryFormatter().Deserialize(ms);
-            //        client.Context = this;
-            //    }
-            //}
+                if (schemaExists)
+                {
+                    SchemaUtilities.UpdateSchemaEntity(schema, pInfo, "senders", senders);
+                    SchemaUtilities.UpdateSchemaEntity(schema, pInfo, "receivers", receivers);
+                }
+                else
+                {
+                    SchemaUtilities.AddSchemaEntity(schema, pInfo, "senders", senders);
+                    SchemaUtilities.AddSchemaEntity(schema, pInfo, "receivers", receivers);
+                }
+                
+                trans.Commit();
+            }
+        }
 
-            //string[] senderKeys = RhinoDoc.ActiveDoc.Strings.GetEntryNames("speckle-client-senders");
-
-            //foreach (string sen in senderKeys)
-            //{
-            //    byte[] serialisedClient = Convert.FromBase64String(RhinoDoc.ActiveDoc.Strings.GetValue("speckle-client-senders", sen));
-
-            //    using (var ms = new MemoryStream())
-            //    {
-            //        ms.Write(serialisedClient, 0, serialisedClient.Length);
-            //        ms.Seek(0, SeekOrigin.Begin);
-            //        RhinoSender client = (RhinoSender)new BinaryFormatter().Deserialize(ms);
-            //        client.CompleteDeserialisation(this);
-            //    }
-            //}
+        /// <summary>
+        /// 
+        /// </summary>
+        public void InstantiateFileClients(Dictionary<string, string> recivers, Dictionary<string, string> senders)
+        {
+            
         }
 
         #region Account Management
@@ -150,6 +216,9 @@ namespace SpeckleRevitPlugin.Classes
             });
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void ReadUserAccounts( )
         {
             _userAccounts = new List<SpeckleAccount>();

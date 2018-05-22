@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SpeckleCore;
+using SpeckleRevitPlugin.Utilities;
 
 namespace SpeckleRevitPlugin.Classes
 {
     /// <summary>
-    /// Class that holds a rhino receiver client warpped around the
-    /// SpeckleApiClient.
+    /// Class that holds a rhino receiver client warpped around the SpeckleApiClient.
     /// </summary>
     [Serializable]
     public class RevitReceiver : ISpeckleRevitClient
@@ -23,6 +24,10 @@ namespace SpeckleRevitPlugin.Classes
         public string StreamId { get; private set; }
         public bool Paused { get; set; }
         public bool Visible { get; set; } = true;
+
+        public RevitReceiver()
+        {
+        }
 
         public RevitReceiver( string payload, Interop parent )
         {
@@ -254,6 +259,14 @@ namespace SpeckleRevitPlugin.Classes
             Client.Dispose();
         }
 
+        public void CompleteDeserialisation(Interop _Context)
+        {
+            Context = _Context;
+
+            Context.NotifySpeckleFrame("client-add", StreamId, JsonConvert.SerializeObject(new { stream = Client.Stream, client = Client }));
+            Context.UserClients.Add(this);
+        }
+
         protected RevitReceiver(SerializationInfo info, StreamingContext context)
         {
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
@@ -269,7 +282,11 @@ namespace SpeckleRevitPlugin.Classes
             {
                 ms.Write(serialisedClient, 0, serialisedClient.Length);
                 ms.Seek(0, SeekOrigin.Begin);
-                Client = (SpeckleApiClient)new BinaryFormatter().Deserialize(ms);
+                var bf = new BinaryFormatter
+                {
+                    Binder = new SearchAssembliesBinder(Assembly.GetExecutingAssembly(), true)
+                };
+                Client = (SpeckleApiClient)bf.Deserialize(ms);
                 StreamId = Client.StreamId;
             }
 

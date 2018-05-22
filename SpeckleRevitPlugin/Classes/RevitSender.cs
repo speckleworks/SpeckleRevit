@@ -524,13 +524,13 @@ namespace SpeckleRevitPlugin.Classes
             Client.Dispose();
         }
 
-        //public void CompleteDeserialisation( Interop _Context )
-        //{
-        //  Context = _Context;
+        public void CompleteDeserialisation(Interop _Context)
+        {
+            Context = _Context;
 
-        //  Context.NotifySpeckleFrame( "client-add", StreamId, JsonConvert.SerializeObject( new { stream = Client.Stream, client = Client } ) );
-        //  Context.UserClients.Add( this );
-        //}
+            Context.NotifySpeckleFrame("client-add", StreamId, JsonConvert.SerializeObject(new { stream = Client.Stream, client = Client }));
+            Context.UserClients.Add(this);
+        }
 
         //protected RhinoSender( SerializationInfo info, StreamingContext context )
         //{
