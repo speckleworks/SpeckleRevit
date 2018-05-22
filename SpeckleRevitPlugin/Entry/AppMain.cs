@@ -29,7 +29,7 @@ namespace SpeckleRevitPlugin.Entry
         internal DockablePaneProviderData DockData;
         //internal static SettingsHelper Settings { get; set; }
 
-        public delegate void ModelSynched(Document doc);
+        public delegate void ModelSynched();
         public static event ModelSynched OnModelSynched;
 
         public Result OnStartup(UIControlledApplication a)
@@ -79,7 +79,7 @@ namespace SpeckleRevitPlugin.Entry
             var doc = e.Document;
             if (doc == null || doc.IsFamilyDocument) return;
 
-            OnModelSynched?.Invoke(doc);
+            OnModelSynched?.Invoke();
         }
 
         private static void OnDocumentSynchronized(object sender, DocumentSynchronizedWithCentralEventArgs e)
@@ -87,7 +87,7 @@ namespace SpeckleRevitPlugin.Entry
             var doc = e.Document;
             if (doc == null || doc.IsFamilyDocument) return;
 
-            OnModelSynched?.Invoke(doc);
+            OnModelSynched?.Invoke();
         }
 
         private void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
@@ -97,12 +97,6 @@ namespace SpeckleRevitPlugin.Entry
             {
                 HideDockablePane();
             }
-            else
-            {
-                //Settings = new SettingsHelper(doc, doc.Application);
-                //OnModelReady?.Invoke(doc);
-            }
-
 
             // TODO: In theory this means that we either opened a new doc or another doc. We need to re-instantiate the speckle panel/clients for a new doc
         }
@@ -113,11 +107,6 @@ namespace SpeckleRevitPlugin.Entry
             if (doc == null || doc.IsFamilyDocument)
             {
                 HideDockablePane();
-            }
-            else
-            {
-                //Settings = new SettingsHelper(doc, doc.Application);
-                //OnModelReady?.Invoke(doc);
             }
 
             // TODO: In theory this means that we either opened a new doc or another doc. We need to re-instantiate the speckle panel/clients for a new doc

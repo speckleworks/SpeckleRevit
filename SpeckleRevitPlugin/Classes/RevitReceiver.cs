@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region Namespaces
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SpeckleCore;
 using SpeckleRevitPlugin.Utilities;
+#endregion
 
 namespace SpeckleRevitPlugin.Classes
 {

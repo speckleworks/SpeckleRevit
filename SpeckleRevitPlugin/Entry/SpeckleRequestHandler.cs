@@ -5,7 +5,6 @@ using System.Threading;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using SpeckleRevitPlugin.Utilities;
-
 #endregion
 
 namespace SpeckleRevitPlugin.Entry
@@ -13,7 +12,10 @@ namespace SpeckleRevitPlugin.Entry
     public class SpeckleRequestHandler : IExternalEventHandler
     {
         public SpeckleRequest Request { get; set; } = new SpeckleRequest();
-        public delegate void ClientsRetrieved(IDictionary<string, string> recivers, IDictionary<string, string> senders);
+        public object Arg1 { get; set; }
+        public object Arg2 { get; set; }
+
+        public delegate void ClientsRetrieved(IDictionary<string, string> receivers, IDictionary<string, string> senders);
         public static event ClientsRetrieved OnClientsRetrieved;
 
         public void Execute(UIApplication uiapp)
@@ -27,7 +29,8 @@ namespace SpeckleRevitPlugin.Entry
                     case SpeckleCommandType.GetClients:
                         GetClients(uiapp);
                         break;
-                    case SpeckleCommandType.Command2:
+                    case SpeckleCommandType.SaveClients:
+                        SaveClients(uiapp);
                         break;
                     case SpeckleCommandType.Command3:
                         break;
@@ -46,17 +49,53 @@ namespace SpeckleRevitPlugin.Entry
         /// 
         /// </summary>
         /// <param name="app"></param>
-        private void GetClients(UIApplication app)
+        private static void GetClients(UIApplication app)
         {
             if (!SchemaUtilities.SchemaExist(Properties.Resources.SchemaName)) return;
 
             var doc = app.ActiveUIDocument.Document;
             var schema = SchemaUtilities.GetSchema(Properties.Resources.SchemaName);
             var pInfo = SchemaUtilities.GetProjectInfo(doc);
-            var recivers = pInfo.GetEntity(schema).Get<IDictionary<string, string>>(schema.GetField("receivers"));
+            var receivers = pInfo.GetEntity(schema).Get<IDictionary<string, string>>(schema.GetField("receivers"));
             var senders = pInfo.GetEntity(schema).Get<IDictionary<string, string>>(schema.GetField("senders"));
 
-            OnClientsRetrieved?.Invoke(recivers, senders);
+            OnClientsRetrieved?.Invoke(receivers, senders);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="app"></param>
+        private void SaveClients(UIApplication app)
+        {
+            // (Konrad) Extract the variables used by this method
+            var senders = Arg1 as Dictionary<string, string>;
+            var receivers = Arg2 as Dictionary<string, string>;
+
+            var doc = app.ActiveUIDocument.Document;
+            var pInfo = SchemaUtilities.GetProjectInfo(doc);
+            var schemaExists = SchemaUtilities.SchemaExist(Properties.Resources.SchemaName);
+            var schema = schemaExists
+                ? SchemaUtilities.GetSchema(Properties.Resources.SchemaName)
+                : SchemaUtilities.CreateSchema();
+
+            using (var trans = new Transaction(doc, "Store Clients"))
+            {
+                trans.Start();
+
+                if (schemaExists)
+                {
+                    SchemaUtilities.UpdateSchemaEntity(schema, pInfo, "senders", senders);
+                    SchemaUtilities.UpdateSchemaEntity(schema, pInfo, "receivers", receivers);
+                }
+                else
+                {
+                    SchemaUtilities.AddSchemaEntity(schema, pInfo, "senders", senders);
+                    SchemaUtilities.AddSchemaEntity(schema, pInfo, "receivers", receivers);
+                }
+
+                trans.Commit();
+            }
         }
 
         /// <summary>
@@ -85,7 +124,7 @@ namespace SpeckleRevitPlugin.Entry
     {
         None,
         GetClients,
-        Command2,
+        SaveClients,
         Command3
     }
 }

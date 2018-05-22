@@ -50,59 +50,6 @@ namespace SpeckleRevitPlugin.Classes
             SpeckleRequestHandler.OnClientsRetrieved += OnClientsRetrieved;
         }
 
-        private void OnClientsRetrieved(IDictionary<string, string> recivers, IDictionary<string, string> senders)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            foreach (var kv in recivers)
-            {
-                var serialisedClient = Convert.FromBase64String(kv.Value);
-                var client = BinaryFormatterUtilities.Read<RevitReceiver>(serialisedClient, assembly);
-                if (client.Client == null) return;
-
-                client.CompleteDeserialisation(this);
-
-
-                //using (var ms = new MemoryStream())
-                //{
-                //    ms.Write(serialisedClient, 0, serialisedClient.Length);
-                //    ms.Seek(0, SeekOrigin.Begin);
-                //    var bf = new BinaryFormatter
-                //    {
-                //        Binder = new SearchAssembliesBinder(Assembly.GetExecutingAssembly(), true)
-                //    };
-                //    var client = (RevitReceiver)bf.Deserialize(ms);
-                //    client.CompleteDeserialisation(this);
-                //}
-            }
-
-            foreach (var kv in senders)
-            {
-                var serialisedClient = Convert.FromBase64String(kv.Value);
-                var client = BinaryFormatterUtilities.Read<RevitSender>(serialisedClient, assembly);
-                if (client.Client == null) return;
-
-                client.CompleteDeserialisation(this);
-                //var serialisedClient = Convert.FromBase64String(kv.Value);
-
-                //using (var ms = new MemoryStream())
-                //{
-                //    ms.Write(serialisedClient, 0, serialisedClient.Length);
-                //    ms.Seek(0, SeekOrigin.Begin);
-                //    var bf = new BinaryFormatter
-                //    {
-                //        Binder = new SearchAssembliesBinder(Assembly.GetExecutingAssembly(), true)
-                //    };
-                //    var client = (RevitSender)bf.Deserialize(ms);
-                //    client.CompleteDeserialisation(this);
-                //}
-            }
-        }
-
-        private void Revit_ModelSynched(Document doc)
-        {
-            SaveFileClients(doc);
-        }
-
         public void SetBrowser(ChromiumWebBrowser browser)
         {
             Browser = browser;
@@ -142,67 +89,7 @@ namespace SpeckleRevitPlugin.Classes
         public void AppReady()
         {
             SpeckleIsReady = true;
-
-            // (Konrad) This is the thread safe way of interacting with Revit. 
-            // Also it's possible that the Speckle app initiates before Revit
-            // Document is open/ready making Extensible Storage inaccessible.
-            AppMain.SpeckleHandler.Request.Make(SpeckleCommandType.GetClients);
-            AppMain.SpeckleEvent.Raise();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="doc"></param>
-        public void SaveFileClients(Document doc)
-        {
-            var senders = new Dictionary<string, string>();
-            var receivers = new Dictionary<string, string>();
-            foreach (var rClient in UserClients)
-            {
-                using (var ms = new MemoryStream())
-                {
-                    var formatter = new BinaryFormatter();
-                    formatter.Serialize(ms, rClient);
-                    var client = Convert.ToBase64String(ms.ToArray());
-                    var clientId = rClient.GetClientId();
-
-                    if (rClient.GetRole() == ClientRole.Receiver) receivers.Add(clientId, client);
-                    else senders.Add(clientId, client);
-                }
-            }
-
-            var pInfo = SchemaUtilities.GetProjectInfo(doc);
-            var schemaExists = SchemaUtilities.SchemaExist(Properties.Resources.SchemaName);
-            var schema = schemaExists 
-                ? SchemaUtilities.GetSchema(Properties.Resources.SchemaName) 
-                : SchemaUtilities.CreateSchema();
-
-            using (var trans = new Transaction(doc, "Store Clients"))
-            {
-                trans.Start();
-
-                if (schemaExists)
-                {
-                    SchemaUtilities.UpdateSchemaEntity(schema, pInfo, "senders", senders);
-                    SchemaUtilities.UpdateSchemaEntity(schema, pInfo, "receivers", receivers);
-                }
-                else
-                {
-                    SchemaUtilities.AddSchemaEntity(schema, pInfo, "senders", senders);
-                    SchemaUtilities.AddSchemaEntity(schema, pInfo, "receivers", receivers);
-                }
-                
-                trans.Commit();
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void InstantiateFileClients(Dictionary<string, string> recivers, Dictionary<string, string> senders)
-        {
-            
+            InstantiateFileClients();
         }
 
         #region Account Management
@@ -267,10 +154,92 @@ namespace SpeckleRevitPlugin.Classes
 
         #region Client Management
 
+        /// <summary>
+        /// Called by SpeckleView when new Receiver was added.
+        /// </summary>
+        /// <param name="payload">Info needed to create RevitReceiver</param>
+        /// <returns></returns>
         public bool AddReceiverClient( string payload )
         {
             var unused = new RevitReceiver(payload, this);
             return true;
+        }
+
+        /// <summary>
+        /// Handler for an event called by Revit when Clients have been retrived from Schema.
+        /// </summary>
+        /// <param name="receivers">Dictionary of Revit Receivers serialized into string.</param>
+        /// <param name="senders">Dictionary of Revit Senders serialized into string.</param>
+        private void OnClientsRetrieved(IDictionary<string, string> receivers, IDictionary<string, string> senders)
+        {
+            UserClients = new List<ISpeckleRevitClient>();
+
+            var assembly = Assembly.GetExecutingAssembly();
+            foreach (var kv in receivers)
+            {
+                var serialisedClient = Convert.FromBase64String(kv.Value);
+                var client = BinaryFormatterUtilities.Read<RevitReceiver>(serialisedClient, assembly);
+                if (client.Client == null) return;
+
+                client.CompleteDeserialisation(this);
+            }
+
+            foreach (var kv in senders)
+            {
+                var serialisedClient = Convert.FromBase64String(kv.Value);
+                var client = BinaryFormatterUtilities.Read<RevitSender>(serialisedClient, assembly);
+                if (client.Client == null) return;
+
+                client.CompleteDeserialisation(this);
+            }
+        }
+
+        /// <summary>
+        /// Handler for an event called by Revit when Document is either saved/synched.
+        /// It's a good time to store Clients in an Extensible Storage then.
+        /// </summary>
+        private void Revit_ModelSynched()
+        {
+            SaveFileClients();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void InstantiateFileClients()
+        {
+            // (Konrad) This is the thread safe way of interacting with Revit. 
+            // Also it's possible that the Speckle app initiates before Revit
+            // Document is open/ready making Extensible Storage inaccessible.
+            AppMain.SpeckleHandler.Request.Make(SpeckleCommandType.GetClients);
+            AppMain.SpeckleEvent.Raise();
+        }
+
+        /// <summary>
+        /// It's used by Speckle View to trigger Client storage.
+        /// </summary>
+        public void SaveFileClients()
+        {
+            var senders = new Dictionary<string, string>();
+            var receivers = new Dictionary<string, string>();
+            foreach (var rClient in UserClients)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    var formatter = new BinaryFormatter();
+                    formatter.Serialize(ms, rClient);
+                    var client = Convert.ToBase64String(ms.ToArray());
+                    var clientId = rClient.GetClientId();
+
+                    if (rClient.GetRole() == ClientRole.Receiver) receivers.Add(clientId, client);
+                    else senders.Add(clientId, client);
+                }
+            }
+
+            AppMain.SpeckleHandler.Arg1 = senders;
+            AppMain.SpeckleHandler.Arg2 = receivers;
+            AppMain.SpeckleHandler.Request.Make(SpeckleCommandType.SaveClients);
+            AppMain.SpeckleEvent.Raise();
         }
 
         //public bool AddSenderClientFromSelection( string _payload )

@@ -2,8 +2,6 @@
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using SpeckleRevitPlugin.Classes;
-
 #endregion
 
 namespace SpeckleRevitPlugin.Entry
