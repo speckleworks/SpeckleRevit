@@ -20,17 +20,13 @@ namespace SpeckleRevitPlugin.Entry
     public class AppMain : IExternalApplication
     {
         private static readonly string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        private static UIControlledApplication uiApp;
         private static AppMain _thisApp;
-        public static ExternalEvent SpeckleEvent;
-        public static SpeckleRequestHandler SpeckleHandler = new SpeckleRequestHandler();
-
         internal static FormMainDock MainDock;
         internal DockablePaneProviderData DockData;
-        //internal static SettingsHelper Settings { get; set; }
 
-        public delegate void ModelSynched();
-        public static event ModelSynched OnModelSynched;
+        public static UIControlledApplication uiApp;
+        public static ExternalEvent SpeckleEvent;
+        public static SpeckleRequestHandler SpeckleHandler = new SpeckleRequestHandler();
 
         public Result OnStartup(UIControlledApplication a)
         {
@@ -61,8 +57,6 @@ namespace SpeckleRevitPlugin.Entry
 
                 a.ControlledApplication.DocumentCreated += OnDocumentCreated;
                 a.ControlledApplication.DocumentOpened += OnDocumentOpened;
-                a.ControlledApplication.DocumentSynchronizedWithCentral += OnDocumentSynchronized;
-                a.ControlledApplication.DocumentSaving += OnDocumentSaving;
 
                 AddRibbonPanel(a);
 
@@ -74,22 +68,6 @@ namespace SpeckleRevitPlugin.Entry
             }
         }
 
-        private static void OnDocumentSaving(object sender, DocumentSavingEventArgs e)
-        {
-            var doc = e.Document;
-            if (doc == null || doc.IsFamilyDocument) return;
-
-            OnModelSynched?.Invoke();
-        }
-
-        private static void OnDocumentSynchronized(object sender, DocumentSynchronizedWithCentralEventArgs e)
-        {
-            var doc = e.Document;
-            if (doc == null || doc.IsFamilyDocument) return;
-
-            OnModelSynched?.Invoke();
-        }
-
         private void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
         {
             var doc = e.Document;
@@ -97,8 +75,6 @@ namespace SpeckleRevitPlugin.Entry
             {
                 HideDockablePane();
             }
-
-            // TODO: In theory this means that we either opened a new doc or another doc. We need to re-instantiate the speckle panel/clients for a new doc
         }
 
         private void OnDocumentCreated(object sender, DocumentCreatedEventArgs e)
@@ -108,12 +84,13 @@ namespace SpeckleRevitPlugin.Entry
             {
                 HideDockablePane();
             }
-
-            // TODO: In theory this means that we either opened a new doc or another doc. We need to re-instantiate the speckle panel/clients for a new doc
         }
 
         public Result OnShutdown(UIControlledApplication a)
         {
+            a.ControlledApplication.DocumentCreated -= OnDocumentCreated;
+            a.ControlledApplication.DocumentOpened -= OnDocumentOpened;
+
             return Result.Succeeded;
         }
 
@@ -136,11 +113,14 @@ namespace SpeckleRevitPlugin.Entry
                 var icon = assembly.GetManifestResourceStream(SourceName);
 
                 // Decoder
-                var decoder = new PngBitmapDecoder(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+                if (icon != null)
+                {
+                    var decoder = new PngBitmapDecoder(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
 
-                // Source
-                ImageSource m_source = decoder.Frames[0];
-                return (m_source);
+                    // Source
+                    ImageSource m_source = decoder.Frames[0];
+                    return (m_source);
+                }
             }
             catch
             {
@@ -199,7 +179,7 @@ namespace SpeckleRevitPlugin.Entry
         /// <param name="tooltip">Tooltip to add to the button</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        private void AddButton(string panel, 
+        private static void AddButton(string panel, 
             string bName, string bText, string iPath16, string iPath32, 
             string dllPath, string dllClass, string tooltip)
         {

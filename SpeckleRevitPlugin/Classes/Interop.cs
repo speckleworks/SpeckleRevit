@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Events;
 using CefSharp;
 using CefSharp.Wpf;
 using Newtonsoft.Json;
@@ -46,21 +47,60 @@ namespace SpeckleRevitPlugin.Classes
             Browser = originalBrowser;
             ReadUserAccounts();
 
-            AppMain.OnModelSynched += Revit_ModelSynched;
+            AppMain.uiApp.ControlledApplication.DocumentCreated += Revit_DocumentCreated;
+            AppMain.uiApp.ControlledApplication.DocumentOpened += Revit_DocumentOpened;
+            AppMain.uiApp.ControlledApplication.DocumentSaved += Revit_DocumentSaved;
+            AppMain.uiApp.ControlledApplication.DocumentSynchronizedWithCentral += Revit_DocumentSynchronized;
             SpeckleRequestHandler.OnClientsRetrieved += OnClientsRetrieved;
-        }
-
-        public void SetBrowser(ChromiumWebBrowser browser)
-        {
-            Browser = browser;
         }
 
         public void Dispose()
         {
-            RemoveAllClients();
+            AppMain.uiApp.ControlledApplication.DocumentCreated -= Revit_DocumentCreated;
+            AppMain.uiApp.ControlledApplication.DocumentOpened -= Revit_DocumentOpened;
+            AppMain.uiApp.ControlledApplication.DocumentSaved -= Revit_DocumentSaved;
+            AppMain.uiApp.ControlledApplication.DocumentSynchronizedWithCentral -= Revit_DocumentSynchronized;
+            SpeckleRequestHandler.OnClientsRetrieved -= OnClientsRetrieved;
 
-            AppMain.OnModelSynched -= Revit_ModelSynched;
-            SpeckleRequestHandler.OnClientsRetrieved += OnClientsRetrieved;
+            RemoveAllClients();
+        }
+
+        #region Global Events
+
+        private void Revit_DocumentSaved(object sender, DocumentSavedEventArgs e)
+        {
+            SaveFileClients();
+        }
+
+        private void Revit_DocumentSynchronized(object sender, DocumentSynchronizedWithCentralEventArgs e)
+        {
+            SaveFileClients();
+        }
+
+        private void Revit_DocumentCreated(object sender, DocumentCreatedEventArgs e)
+        {
+            var doc = e.Document;
+            if (doc == null || doc.IsFamilyDocument) return;
+
+            NotifySpeckleFrame("purge-clients", "", "");
+            RemoveAllClients();
+        }
+
+        private void Revit_DocumentOpened(object sender, DocumentOpenedEventArgs e)
+        {
+            var doc = e.Document;
+            if (doc == null || doc.IsFamilyDocument) return;
+
+            NotifySpeckleFrame("purge-clients", "", "");
+            RemoveAllClients();
+            InstantiateFileClients();
+        }
+
+        #endregion
+
+        public void SetBrowser(ChromiumWebBrowser browser)
+        {
+            Browser = browser;
         }
 
         public void ShowDev()
@@ -166,6 +206,18 @@ namespace SpeckleRevitPlugin.Classes
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public void InstantiateFileClients()
+        {
+            // (Konrad) This is the thread safe way of interacting with Revit. 
+            // Also it's possible that the Speckle app initiates before Revit
+            // Document is open/ready making Extensible Storage inaccessible.
+            AppMain.SpeckleHandler.Request.Make(SpeckleCommandType.GetClients);
+            AppMain.SpeckleEvent.Raise();
+        }
+
+        /// <summary>
         /// Handler for an event called by Revit when Clients have been retrived from Schema.
         /// </summary>
         /// <param name="receivers">Dictionary of Revit Receivers serialized into string.</param>
@@ -189,27 +241,6 @@ namespace SpeckleRevitPlugin.Classes
 
             //    client.CompleteDeserialisation(this);
             //}
-        }
-
-        /// <summary>
-        /// Handler for an event called by Revit when Document is either saved/synched.
-        /// It's a good time to store Clients in an Extensible Storage then.
-        /// </summary>
-        private void Revit_ModelSynched()
-        {
-            SaveFileClients();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void InstantiateFileClients()
-        {
-            // (Konrad) This is the thread safe way of interacting with Revit. 
-            // Also it's possible that the Speckle app initiates before Revit
-            // Document is open/ready making Extensible Storage inaccessible.
-            AppMain.SpeckleHandler.Request.Make(SpeckleCommandType.GetClients);
-            AppMain.SpeckleEvent.Raise();
         }
 
         /// <summary>
