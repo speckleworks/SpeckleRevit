@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
+using SpeckleRevitPlugin.Classes;
 using SpeckleRevitPlugin.UI;
 
 #endregion
@@ -21,9 +22,9 @@ namespace SpeckleRevitPlugin.Entry
     {
         private static readonly string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private static AppMain _thisApp;
-        internal static FormMainDock MainDock;
         internal DockablePaneProviderData DockData;
 
+        public static FormMainDock MainDock;
         public static UIControlledApplication uiApp;
         public static ExternalEvent SpeckleEvent;
         public static SpeckleRequestHandler SpeckleHandler = new SpeckleRequestHandler();
@@ -162,7 +163,7 @@ namespace SpeckleRevitPlugin.Entry
                 "SpeckleRevitPlugin.Resources.Template_16.png",
                 "SpeckleRevitPlugin.Resources.Template_32.png",
                 (m_Path + "\\SpeckleRevitPlugin.dll"),
-                "SpeckleRevitPlugin.Entry.SpeckleWallCmd",
+                "SpeckleRevitPlugin.Tools.WallTool.SpeckleWallCmd",
                 "Make Walls in Revit using Speckle Streams.");
         }
 

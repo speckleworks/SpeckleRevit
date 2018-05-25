@@ -99,7 +99,7 @@ namespace SpeckleRevitPlugin.UI
         private void Form_MainDock_OnLoaded(object sender, RoutedEventArgs e)
         {
 #if DEBUG
-            Browser.ShowDevTools();
+            //Browser.ShowDevTools();
 #endif
         }
 

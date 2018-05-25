@@ -1,0 +1,174 @@
+﻿<Controls:MetroWindow x:Class="SpeckleRevitPlugin.Tools.WallTool.SpeckleWallView"
+                      x:Name="Win"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:t="clr-namespace:SpeckleRevitPlugin.UI"
+                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                      xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                      TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+                      Background="{DynamicResource MaterialDesignPaper}"
+                      TextElement.FontWeight="Medium"
+                      TextElement.FontSize="14"
+                      FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
+                      mc:Ignorable="d" 
+                      d:DesignHeight="300" d:DesignWidth="400" Width="400" MinHeight="600" MinWidth="400" SizeToContent="Height" EnableDWMDropShadow="True">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closed">
+            <i:InvokeCommandAction Command="{Binding WindowClosed}" CommandParameter="{Binding ElementName=Win}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Controls:MetroWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+                    <t:BooleanToVisibilityInverseConverter x:Key="BooleanToVisibilityInverseConverter"/>
+                </ResourceDictionary>
+
+                <!-- MahApps -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+
+                <!-- Material Design -->
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.LightBlue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.LightBlue.xaml" />
+
+                <!-- Material Design: MahApps Compatibility -->
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.RangeSlider.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- MahApps Brushes -->
+            <SolidColorBrush x:Key="HighlightBrush" Color="{DynamicResource Primary700}"/>
+            <SolidColorBrush x:Key="AccentColorBrush" Color="{DynamicResource Primary500}"/>
+            <SolidColorBrush x:Key="AccentColorBrush2" Color="{DynamicResource Primary400}"/>
+            <SolidColorBrush x:Key="AccentColorBrush3" Color="{DynamicResource Primary300}"/>
+            <SolidColorBrush x:Key="AccentColorBrush4" Color="{DynamicResource Primary200}"/>
+            <SolidColorBrush x:Key="WindowTitleColorBrush" Color="{DynamicResource Primary700}"/>
+            <SolidColorBrush x:Key="AccentSelectedColorBrush" Color="{DynamicResource Primary500Foreground}"/>
+            <LinearGradientBrush x:Key="ProgressBrush" EndPoint="0.001,0.5" StartPoint="1.002,0.5">
+                <GradientStop Color="{DynamicResource Primary700}" Offset="0"/>
+                <GradientStop Color="{DynamicResource Primary300}" Offset="1"/>
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="CheckmarkFill" Color="{DynamicResource Primary500}"/>
+            <SolidColorBrush x:Key="RightArrowFill" Color="{DynamicResource Primary500}"/>
+            <SolidColorBrush x:Key="IdealForegroundColorBrush" Color="{DynamicResource Primary500Foreground}"/>
+            <SolidColorBrush x:Key="IdealForegroundDisabledBrush" Color="{DynamicResource Primary500}" Opacity="0.4"/>
+        </ResourceDictionary>
+    </Controls:MetroWindow.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="90"/>
+        </Grid.RowDefinitions>
+        <Border BorderBrush="Transparent" Grid.Row="0"
+                BorderThickness="0" 
+                Visibility="{Binding IsChecked, ElementName=AddInputButton, Converter={StaticResource BooleanToVisibilityInverseConverter}}" Grid.RowSpan="2">
+            <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect SlideInFromBottom}">
+                <ItemsControl ItemsSource="{Binding Inputs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type t:InputControl}">
+                            <t:InputControl Margin="0,5,0,0"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </materialDesign:TransitioningContent>
+        </Border>
+        <Border BorderThickness="0" Grid.Row="0"
+                BorderBrush="Transparent" 
+                Visibility="{Binding IsChecked, ElementName=AddInputButton, Converter={StaticResource BooleanToVisibilityConverter}}" Grid.RowSpan="2">
+            <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect SlideInFromBottom}">
+                <GroupBox Header="Shadow Header" 
+                      Style="{DynamicResource MaterialDesignGroupBox}" 
+                      materialDesign:ColorZoneAssist.Mode="Accent"
+                      BorderThickness="0">
+                    <GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Name="xButton"
+                                        Width="24" 
+                                        Height="24"
+                                        Margin="0,2"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding Path=DataContext.CloseFlyout, RelativeSource={RelativeSource AncestorType={x:Type Controls:MetroWindow}}}"
+                                        Style="{DynamicResource MaterialDesignToolButton}">
+                                    <Viewbox Width="18" Height="18">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" 
+                                                  Fill="White" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
+                                <TextBlock Margin="8,2,0,0" VerticalAlignment="Center" 
+                                           Style="{StaticResource MaterialDesignSubheadingTextBlock}" 
+                                           Text="Add Input"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </GroupBox.HeaderTemplate>
+                    <StackPanel Orientation="Vertical" 
+                                Margin="20,10">
+                        <ComboBox Name="AvailableItemsComboBox" 
+                                  ItemsSource="{Binding AvailableInputs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  SelectedItem="{Binding SelectedInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  DisplayMemberPath="Name"
+                                  Height="36"
+                                  VerticalAlignment="Top"
+                                  materialDesign:HintAssist.Hint="Existing Inputs">
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+                            <Button Name="CancelButton"
+                                    Content="Cancel"
+                                    Margin="10,20"
+                                    Width="76"
+                                    Height="24"
+                                    Foreground="Gray"
+                                    Command="{Binding CloseFlyout, Mode=OneWay}"
+                                    Style="{DynamicResource MaterialDesignFlatButton}">
+                            </Button>
+                            <Button x:Name="AddButton"
+                                    Content="Add"
+                                    Margin="0,20"
+                                    Width="76"
+                                    Height="24"
+                                    Foreground="White"
+                                    Command="{Binding AddInput, Mode=OneWay}"
+                                    Style="{DynamicResource MaterialDesignRaisedButton}" 
+                                    materialDesign:ShadowAssist.ShadowDepth="Depth1">
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </materialDesign:TransitioningContent>
+        </Border>
+        <Controls:ToggleSwitchButton Name="AddInputButton"
+                                     Grid.Row="1"
+                                     Width="48" 
+                                     Height="48" 
+                                     HorizontalAlignment="Right" 
+                                     VerticalAlignment="Bottom"
+                                     Margin="0,0,20,20"
+                                     Style="{DynamicResource MaterialDesignActionToggleButton}"
+                                     IsChecked="{Binding AddInputChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Visibility="{Binding IsChecked, RelativeSource={RelativeSource Self}, Converter={StaticResource BooleanToVisibilityInverseConverter}}"
+                                     materialDesign:ShadowAssist.ShadowDepth="Depth2" Grid.RowSpan="2">
+            <Viewbox Width="36" Height="36">
+                <Canvas Width="24" Height="24">
+                    <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="White" />
+                </Canvas>
+            </Viewbox>
+        </Controls:ToggleSwitchButton>
+    </Grid>
+</Controls:MetroWindow>
