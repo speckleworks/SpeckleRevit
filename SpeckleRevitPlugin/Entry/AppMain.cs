@@ -1,65 +1,134 @@
 ﻿#region Namespaces
-using Microsoft.VisualBasic;
+
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
-using System.Windows.Media.Imaging;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Media;
-
-using Autodesk.Revit.ApplicationServices;
+using System.Windows.Media.Imaging;
 using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
+using SpeckleRevitPlugin.Classes;
+using SpeckleRevitPlugin.UI;
+
 #endregion
 
-namespace SpeckleRevitPlugin
+namespace SpeckleRevitPlugin.Entry
 {
     [Transaction(TransactionMode.Manual)]
-    class AppMain : IExternalApplication
+    public class AppMain : IExternalApplication
     {
-        static string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        static UIControlledApplication uiApp;
-        static AppMain _thisApp;
-
-        internal static form_MainDock MainDock;
+        private static readonly string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private static AppMain _thisApp;
         internal DockablePaneProviderData DockData;
-        internal static SettingsHelper Settings { get; set; }
 
-        #region Setup
+        public static FormMainDock MainDock;
+        public static UIControlledApplication uiApp;
+        public static ExternalEvent SpeckleEvent;
+        public static SpeckleRequestHandler SpeckleHandler = new SpeckleRequestHandler();
+
+        public Result OnStartup(UIControlledApplication a)
+        {
+            try
+            {
+                uiApp = a;
+                _thisApp = this;
+
+                if (MainDock == null)
+                {
+                    MainDock = new FormMainDock();
+                    DockData = new DockablePaneProviderData
+                    {
+                        FrameworkElement = MainDock,
+                        InitialState = new DockablePaneState
+                        {
+                            DockPosition = DockPosition.Right
+                        }
+                    };
+                }
+
+                uiApp.RegisterDockablePane(GlobalHelper.MainDockablePaneId, GlobalHelper.MainPanelName(), MainDock);
+
+                // (Konrad) We are going to use this External Event Handler all across Speckle
+                // It's best to keep it on the main app, and keep it public.
+                SpeckleHandler = new SpeckleRequestHandler();
+                SpeckleEvent = ExternalEvent.Create(SpeckleHandler);
+
+                a.ControlledApplication.DocumentCreated += OnDocumentCreated;
+                a.ControlledApplication.DocumentOpened += OnDocumentOpened;
+
+                AddRibbonPanel(a);
+
+                return Result.Succeeded;
+            }
+            catch
+            {
+                return Result.Failed;
+            }
+        }
+
+        private void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
+        {
+            var doc = e.Document;
+            if (doc == null || doc.IsFamilyDocument)
+            {
+                HideDockablePane();
+            }
+        }
+
+        private void OnDocumentCreated(object sender, DocumentCreatedEventArgs e)
+        {
+            var doc = e.Document;
+            if (doc == null || doc.IsFamilyDocument)
+            {
+                HideDockablePane();
+            }
+        }
+
+        public Result OnShutdown(UIControlledApplication a)
+        {
+            a.ControlledApplication.DocumentCreated -= OnDocumentCreated;
+            a.ControlledApplication.DocumentOpened -= OnDocumentOpened;
+
+            return Result.Succeeded;
+        }
+
+        #region Ribbon Utilities
+
         /// <summary>
         /// Load an Image Source from File
         /// </summary>
         /// <param name="SourceName"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        private ImageSource LoadPngImgSource(string SourceName)
+        private static ImageSource LoadPngImgSource(string SourceName)
         {
             try
             {
                 // Assembly
-                Assembly assembly = Assembly.GetExecutingAssembly();
+                var assembly = Assembly.GetExecutingAssembly();
 
                 // Stream
-                Stream icon = assembly.GetManifestResourceStream(SourceName);
+                var icon = assembly.GetManifestResourceStream(SourceName);
 
                 // Decoder
-                PngBitmapDecoder decoder = new PngBitmapDecoder(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+                if (icon != null)
+                {
+                    var decoder = new PngBitmapDecoder(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
 
-                // Source
-                ImageSource m_source = decoder.Frames[0];
-                return (m_source);
+                    // Source
+                    ImageSource m_source = decoder.Frames[0];
+                    return (m_source);
+                }
             }
             catch
             {
+                // ignored
             }
 
-            // Fail
             return null;
-
         }
 
         /// <summary>
@@ -71,7 +140,6 @@ namespace SpeckleRevitPlugin
         {
             try
             {
-                // First Create the Tab
                 a.CreateRibbonTab("Speckle");
             }
             catch
@@ -80,152 +148,83 @@ namespace SpeckleRevitPlugin
             }
 
             // Tools
-            AddButton("Speckle", 
-                    "Plugin\r\nTest",
-                    "Plugin\r\nTest", 
-                    "SpeckleRevitPlugin.Resources.Template_16.png", 
-                    "SpeckleRevitPlugin.Resources.Template_32.png", 
-                    (m_Path + "\\SpeckleRevitPlugin.dll"), 
-                    "SpeckleRevitPlugin.ExtCmd", 
+            AddButton("Speckle",
+                    "Show\r\nSpeckle",
+                    "Show\r\nSpeckle",
+                    "SpeckleRevitPlugin.Resources.Template_16.png",
+                    "SpeckleRevitPlugin.Resources.Template_32.png",
+                    (m_Path + "\\SpeckleRevitPlugin.dll"),
+                    "SpeckleRevitPlugin.Entry.ExtCmd",
                     "Speckle connection test for Revit.");
+
+            AddButton("Tools",
+                "Speckle\r\nWall",
+                "Speckle\r\nWall",
+                "SpeckleRevitPlugin.Resources.Template_16.png",
+                "SpeckleRevitPlugin.Resources.Template_32.png",
+                (m_Path + "\\SpeckleRevitPlugin.dll"),
+                "SpeckleRevitPlugin.Tools.WallTool.SpeckleWallCmd",
+                "Make Walls in Revit using Speckle Streams.");
         }
 
         /// <summary>
         /// Add a button to a Ribbon Tab
         /// </summary>
-        /// <param name="Rpanel">The name of the ribbon panel</param>
-        /// <param name="ButtonName">The Name of the Button</param>
-        /// <param name="ButtonText">Command Text</param>
-        /// <param name="ImagePath16">Small Image</param>
-        /// <param name="ImagePath32">Large Image</param>
+        /// <param name="panel">The name of the ribbon panel</param>
+        /// <param name="bName">The Name of the Button</param>
+        /// <param name="bText">Command Text</param>
+        /// <param name="iPath16">Small Image</param>
+        /// <param name="iPath32">Large Image</param>
         /// <param name="dllPath">Path to the DLL file</param>
         /// <param name="dllClass">Full qualified class descriptor</param>
-        /// <param name="Tooltip">Tooltip to add to the button</param>
+        /// <param name="tooltip">Tooltip to add to the button</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        private bool AddButton(string Rpanel, string ButtonName, string ButtonText, string ImagePath16, string ImagePath32, string dllPath, string dllClass, string Tooltip)
+        private static void AddButton(string panel, 
+            string bName, string bText, string iPath16, string iPath32, 
+            string dllPath, string dllClass, string tooltip)
         {
             try
             {
-                // The Ribbon Panel
-                RibbonPanel ribbonPanel = null;
-
-                // Find the Panel within the Case Tab
-                List<RibbonPanel> rp = new List<RibbonPanel>();
-                rp = uiApp.GetRibbonPanels("Speckle");
-                foreach (RibbonPanel x in rp)
-                {
-                    if (x.Name.ToUpper() == Rpanel.ToUpper())
-                    {
-                        ribbonPanel = x;
-                    }
-                }
-
                 // Create the Panel if it doesn't Exist
-                if (ribbonPanel == null)
-                {
-                    ribbonPanel = uiApp.CreateRibbonPanel("Speckle", Rpanel);
-                }
+                var ribbonPanel =
+                    uiApp.GetRibbonPanels("Speckle").FirstOrDefault(x =>
+                        string.Equals(x.Name, panel, StringComparison.OrdinalIgnoreCase)) ??
+                    uiApp.CreateRibbonPanel("Speckle", panel);
 
                 // Create the Pushbutton Data
-                PushButtonData pushButtonData = new PushButtonData(ButtonName, ButtonText, dllPath, dllClass);
-                if (!string.IsNullOrEmpty(ImagePath16))
+                var pushButtonData = new PushButtonData(bName, bText, dllPath, dllClass);
+                if (!string.IsNullOrEmpty(iPath16))
                 {
                     try
                     {
-                        pushButtonData.Image = LoadPngImgSource(ImagePath16);
+                        pushButtonData.Image = LoadPngImgSource(iPath16);
                     }
                     catch
                     {
                         Debug.WriteLine("Image not found", "SPK");
                     }
                 }
-                if (!string.IsNullOrEmpty(ImagePath32))
+                if (!string.IsNullOrEmpty(iPath32))
                 {
                     try
                     {
-                        pushButtonData.LargeImage = LoadPngImgSource(ImagePath32);
+                        pushButtonData.LargeImage = LoadPngImgSource(iPath32);
                     }
                     catch
                     {
                         Debug.WriteLine("Image not found", "SPK");
                     }
                 }
-                pushButtonData.ToolTip = Tooltip;
+                pushButtonData.ToolTip = tooltip;
 
                 // Add the button to the tab
-                PushButton pushButtonDataAdd = (PushButton)ribbonPanel.AddItem(pushButtonData);
+                var unused = (PushButton)ribbonPanel.AddItem(pushButtonData);
             }
             catch
             {
-                // Quiet Fail
+                // ignored
             }
-            return true;
-        }
-        #endregion
-
-        #region Startup
-        public Result OnStartup(UIControlledApplication a)
-        {
-            try
-            {
-                // The Shared uiApp variable
-                uiApp = a;
-                _thisApp = this;
-
-                // Register the dockable pane
-                if (MainDock == null)
-                {
-                    MainDock = new form_MainDock();
-                    DockData = new DockablePaneProviderData
-                    {
-                        FrameworkElement = MainDock,
-                        InitialState = new DockablePaneState
-                        {
-                            DockPosition = DockPosition.Right
-                        }
-                    };
-                }
-                uiApp.RegisterDockablePane(GlobalHelper.MainDockablePaneId, GlobalHelper.MainPanelName(), MainDock as IDockablePaneProvider);
-
-                // Detect when a new model is in focus
-                a.ViewActivated += OnViewActivated;
-
-                // Add the Ribbon Panel!!
-                AddRibbonPanel(a);
-
-                // Return Success
-                return Result.Succeeded;
-
-            }
-            catch { return Result.Failed; }
-        }
-        #endregion
-
-        #region Shutdown
-        public Result OnShutdown(UIControlledApplication a)
-        {
-            return Result.Succeeded;
-        }
-        #endregion
-
-        #region Internal Members - Events
-        /// <summary>
-        /// View change will detect a model change
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void OnViewActivated(object sender, ViewActivatedEventArgs e)
-        {
-            try
-            {
-                if (Settings == null) Settings = new SettingsHelper(e.Document, null);
-                if (Settings.App == null)
-                {
-                    HideDockablePane();
-                }
-            }
-            catch { }
         }
 
         /// <summary>
@@ -235,11 +234,15 @@ namespace SpeckleRevitPlugin
         {
             try
             {
-                DockablePane m_dp = uiApp.GetDockablePane(GlobalHelper.MainDockablePaneId);
+                var m_dp = uiApp.GetDockablePane(GlobalHelper.MainDockablePaneId);
                 m_dp.Hide();
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         }
+
         #endregion
     }
 }
