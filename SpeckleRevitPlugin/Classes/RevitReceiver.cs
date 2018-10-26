@@ -154,8 +154,8 @@ namespace SpeckleRevitPlugin.Classes
         {
             try
             {
-                var response = Client.StreamGetAsync(StreamId, "fields=name");
-                Client.Stream.Name = response.Result.Resource.Name;
+                var response = Client.StreamGetAsync(StreamId);
+                Client.Stream.Name = response.Result.Stream.Name;
                 Context.NotifySpeckleFrame("client-metadata-update", StreamId, Client.Stream.ToJson());
             }
             catch (Exception err)
@@ -171,7 +171,7 @@ namespace SpeckleRevitPlugin.Classes
 
             try
             {
-                var streamGetResponse = Client.StreamGetAsync(StreamId, null).Result;
+                var streamGetResponse = Client.StreamGetAsync(StreamId).Result;
 
                 if (streamGetResponse.Success == false)
                 {
@@ -179,7 +179,7 @@ namespace SpeckleRevitPlugin.Classes
                     Context.NotifySpeckleFrame("client-log", StreamId, JsonConvert.SerializeObject("Failed to retrieve global update."));
                 }
 
-                Client.Stream = streamGetResponse.Resource;
+                Client.Stream = streamGetResponse.Stream;
 
                 Context.NotifySpeckleFrame("client-metadata-update", StreamId, Client.Stream.ToJson());
             }
@@ -196,36 +196,36 @@ namespace SpeckleRevitPlugin.Classes
 
             try
             {
-                var streamGetResponse = Client.StreamGetAsync(StreamId, null).Result;
+                var streamGetResponse = Client.StreamGetAsync(StreamId).Result;
                 if (streamGetResponse.Success == false)
                 {
                     Context.NotifySpeckleFrame("client-error", StreamId, streamGetResponse.Message);
                     Context.NotifySpeckleFrame("client-log", StreamId, JsonConvert.SerializeObject("Failed to retrieve global update."));
                 }
 
-                Client.Stream = streamGetResponse.Resource;
+                Client.Stream = streamGetResponse.Stream;
                 Context.NotifySpeckleFrame("client-metadata-update", StreamId, Client.Stream.ToJson());
                 Context.NotifySpeckleFrame("client-is-loading", StreamId, "");
 
                 // prepare payload
-                var payload = Client.Stream.Objects.Where(o => !Context.SpeckleObjectCache.ContainsKey(o._id)).Select(obj => obj._id).ToArray();
-                var getObjectsResult = Client.ObjectGetBulkAsync(payload, "omit=displayValue").Result;
+                var payload = Client.Stream.Objects.Where(o => !Context.SpeckleObjectCache.ContainsKey(o)).Select(obj => obj).ToArray();
+                //var getObjectsResult = Client.ObjectGetBulkAsync( "omit=displayValue", payload).Result;
 
-                if (getObjectsResult.Success == false)
-                    Context.NotifySpeckleFrame("client-error", StreamId, streamGetResponse.Message);
+                //if (getObjectsResult.Success == false)
+                //    Context.NotifySpeckleFrame("client-error", StreamId, streamGetResponse.Message);
 
-                // add to cache
-                foreach (var obj in getObjectsResult.Resources)
-                {
-                    Context.SpeckleObjectCache[obj._id] = obj;
-                }
+                //// add to cache
+                //foreach (var obj in getObjectsResult.Objects)
+                //{
+                //    Context.SpeckleObjectCache[obj._id] = obj;
+                //}
 
-                // populate real objects
-                Objects.Clear();
-                foreach (var obj in Client.Stream.Objects)
-                {
-                    Objects.Add(Context.SpeckleObjectCache[obj._id]);
-                }
+                //// populate real objects
+                //Objects.Clear();
+                //foreach (var obj in Client.Stream.Objects)
+                //{
+                //    Objects.Add(Context.SpeckleObjectCache[obj._id]);
+                //}
 
                 //DisplayContents();
                 Context.NotifySpeckleFrame("client-done-loading", StreamId, "");
@@ -241,8 +241,8 @@ namespace SpeckleRevitPlugin.Classes
         {
             try
             {
-                var getStream = Client.StreamGetAsync(StreamId, null).Result;
-                Client.Stream = getStream.Resource;
+                var getStream = Client.StreamGetAsync(StreamId).Result;
+                Client.Stream = getStream.Stream;
 
                 Context.NotifySpeckleFrame("client-children", StreamId, Client.Stream.ToJson());
             }
@@ -267,12 +267,12 @@ namespace SpeckleRevitPlugin.Classes
             //TODO: Implement
         }
 
-        public void ToggleLayerVisibility(string layerId, bool status)
+        public void ToggleSpeckleLayerVisibility(string layerId, bool status)
         {
             //TODO: Implement
         }
 
-        public void ToggleLayerHover(string layerId, bool status)
+        public void ToggleSpeckleLayerHover(string layerId, bool status)
         {
             //TODO: Implement
         }

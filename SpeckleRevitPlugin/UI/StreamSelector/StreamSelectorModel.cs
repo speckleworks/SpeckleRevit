@@ -14,7 +14,7 @@ namespace SpeckleRevitPlugin.UI.StreamSelector
         /// 
         /// </summary>
         /// <returns></returns>
-        public List<SpeckleStream> GetStreams()
+        public List<DataStream> GetStreams()
         {
             var streams = FormMainDock.Store.UserClients.Where(x => x.GetRole() == ClientRole.Receiver)
                 .Cast<RevitReceiver>()
@@ -23,7 +23,7 @@ namespace SpeckleRevitPlugin.UI.StreamSelector
                 .ToList();
             return streams.Any()
                 ? streams
-                : new List<SpeckleStream>();
+                : new List<DataStream>();
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace SpeckleRevitPlugin.UI.StreamSelector
         /// </summary>
         /// <param name="stream"></param>
         /// <returns></returns>
-        public List<Layer> GetLayers(SpeckleStream stream)
+        public List<SpeckleLayer> GetLayers(DataStream stream)
         {
             return stream.Layers;
         }

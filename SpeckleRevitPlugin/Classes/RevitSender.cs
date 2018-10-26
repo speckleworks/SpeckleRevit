@@ -98,7 +98,7 @@ namespace SpeckleRevitPlugin.Classes
         //  RhinoDoc.DeleteRhinoObject += RhinoDoc_DeleteRhinoObject;
         //  RhinoDoc.AddRhinoObject += RhinoDoc_AddRhinoObject;
         //  RhinoDoc.UndeleteRhinoObject += RhinoDoc_UndeleteRhinoObject;
-        //  RhinoDoc.LayerTableEvent += RhinoDoc_LayerTableEvent;
+        //  RhinoDoc.SpeckleLayerTableEvent += RhinoDoc_SpeckleLayerTableEvent;
         //}
 
         //public void UnsetRhinoEvents( )
@@ -107,10 +107,10 @@ namespace SpeckleRevitPlugin.Classes
         //  RhinoDoc.DeleteRhinoObject -= RhinoDoc_DeleteRhinoObject;
         //  RhinoDoc.AddRhinoObject -= RhinoDoc_AddRhinoObject;
         //  RhinoDoc.UndeleteRhinoObject -= RhinoDoc_UndeleteRhinoObject;
-        //  RhinoDoc.LayerTableEvent -= RhinoDoc_LayerTableEvent;
+        //  RhinoDoc.SpeckleLayerTableEvent -= RhinoDoc_SpeckleLayerTableEvent;
         //}
 
-        //private void RhinoDoc_LayerTableEvent( object sender, Rhino.DocObjects.Tables.LayerTableEventArgs e )
+        //private void RhinoDoc_SpeckleLayerTableEvent( object sender, Rhino.DocObjects.Tables.SpeckleLayerTableEventArgs e )
         //{
         //  DataSender.Start();
         //}
@@ -252,11 +252,11 @@ namespace SpeckleRevitPlugin.Classes
             ////TODO: I am not sure how we are going to send stuff to Speckle just yet.
             ////TODO: I only know that serializing the whole damn Revit Element is not a good idea.
             //var objs = new Element[]{};
-            ////var objs = RhinoDoc.ActiveDoc.Objects.FindByUserString("spk_" + this.StreamId, "*", false).OrderBy(obj => obj.Attributes.LayerIndex);
+            ////var objs = RhinoDoc.ActiveDoc.Objects.FindByUserString("spk_" + this.StreamId, "*", false).OrderBy(obj => obj.Attributes.SpeckleLayerIndex);
 
             //Context.NotifySpeckleFrame("client-progress-message", StreamId, "Converting " + objs.Count() + " objects...");
 
-            //List<SpeckleCore.Layer> pLayers = new List<SpeckleCore.Layer>();
+            //List<SpeckleCore.SpeckleLayer> pSpeckleLayers = new List<SpeckleCore.SpeckleLayer>();
             //List<SpeckleObject> convertedObjects = new List<SpeckleObject>();
             //List<List<SpeckleObject>> objectUpdatePayloads = new List<List<SpeckleObject>>();
 
@@ -269,25 +269,25 @@ namespace SpeckleRevitPlugin.Classes
             //foreach (RhinoObject obj in objs)
             //{
             //    // layer list creation
-            //    Rhino.DocObjects.Layer layer = RhinoDoc.ActiveDoc.Layers[obj.Attributes.LayerIndex];
-            //    if (lindex != obj.Attributes.LayerIndex)
+            //    Rhino.DocObjects.SpeckleLayer layer = RhinoDoc.ActiveDoc.SpeckleLayers[obj.Attributes.SpeckleLayerIndex];
+            //    if (lindex != obj.Attributes.SpeckleLayerIndex)
             //    {
-            //        var spkLayer = new SpeckleCore.Layer()
+            //        var spkSpeckleLayer = new SpeckleCore.SpeckleLayer()
             //        {
             //            Name = layer.FullPath,
             //            Guid = layer.Id.ToString(),
             //            ObjectCount = 1,
             //            StartIndex = count,
             //            OrderIndex = orderIndex++,
-            //            Properties = new LayerProperties() { Color = new SpeckleCore.SpeckleBaseColor() { A = 1, Hex = System.Drawing.ColorTranslator.ToHtml(layer.Color) }, }
+            //            Properties = new SpeckleLayerProperties() { Color = new SpeckleCore.SpeckleBaseColor() { A = 1, Hex = System.Drawing.ColorTranslator.ToHtml(layer.Color) }, }
             //        };
 
-            //        pLayers.Add(spkLayer);
-            //        lindex = obj.Attributes.LayerIndex;
+            //        pSpeckleLayers.Add(spkSpeckleLayer);
+            //        lindex = obj.Attributes.SpeckleLayerIndex;
             //    }
             //    else
             //    {
-            //        var spkl = pLayers.FirstOrDefault(pl => pl.Name == layer.FullPath);
+            //        var spkl = pSpeckleLayers.FirstOrDefault(pl => pl.Name == layer.FullPath);
             //        spkl.ObjectCount++;
             //    }
 
@@ -379,7 +379,7 @@ namespace SpeckleRevitPlugin.Classes
             //Context.NotifySpeckleFrame("client-progress-message", StreamId, "Updating stream...");
 
             //// finalise layer creation
-            //foreach (var layer in pLayers)
+            //foreach (var layer in pSpeckleLayers)
             //    layer.Topology = "0-" + layer.ObjectCount + " ";
 
             //// create placeholders for stream update payload
@@ -389,8 +389,8 @@ namespace SpeckleRevitPlugin.Classes
             //    foreach (var obj in myResponse.Resources) placeholders.Add(new SpecklePlaceholder() { _id = obj._id, ApplicationId = allObjects[m++].ApplicationId });
 
             //// create stream update payload
-            //SpeckleStream streamUpdatePayload = new SpeckleStream();
-            //streamUpdatePayload.Layers = pLayers;
+            //DataStream streamUpdatePayload = new DataStream();
+            //streamUpdatePayload.SpeckleLayers = pSpeckleLayers;
             //streamUpdatePayload.Objects = placeholders;
             //streamUpdatePayload.Name = Client.Stream.Name;
 
@@ -425,7 +425,7 @@ namespace SpeckleRevitPlugin.Classes
             //}
 
             //// emit  events, etc.
-            //Client.Stream.Layers = streamUpdatePayload.Layers.ToList();
+            //Client.Stream.SpeckleLayers = streamUpdatePayload.SpeckleLayers.ToList();
             //Client.Stream.Objects = placeholders;
 
             //Context.NotifySpeckleFrame("client-metadata-update", StreamId, Client.Stream.ToJson());
@@ -461,7 +461,7 @@ namespace SpeckleRevitPlugin.Classes
             Visible = status;
         }
 
-        //public void ToggleLayerHover( string layerId, bool status )
+        //public void ToggleSpeckleLayerHover( string layerId, bool status )
         //{
         //  Debug.WriteLine( "OHAI: " + layerId + " " + status );
         //  Display.Enabled = true;
@@ -473,15 +473,15 @@ namespace SpeckleRevitPlugin.Classes
         //    return;
         //  }
 
-        //  int myLIndex = RhinoDoc.ActiveDoc.Layers.Find( new Guid( layerId ), true );
+        //  int myLIndex = RhinoDoc.ActiveDoc.SpeckleLayers.Find( new Guid( layerId ), true );
 
         //  var objs1 = RhinoDoc.ActiveDoc.Objects.FindByUserString( "spk_" + this.StreamId, "*", false );
         //  var cop = objs1;
-        //  var objs = objs1.OrderBy( obj => obj.Attributes.LayerIndex ).ToList();
+        //  var objs = objs1.OrderBy( obj => obj.Attributes.SpeckleLayerIndex ).ToList();
         //  var count = objs.Count;
         //  foreach ( var obj in objs )
         //  {
-        //    if ( obj.Attributes.LayerIndex == myLIndex )
+        //    if ( obj.Attributes.SpeckleLayerIndex == myLIndex )
         //      Display.Geometry.Add( obj.Geometry );
         //  }
 
@@ -490,12 +490,12 @@ namespace SpeckleRevitPlugin.Classes
 
         //}
 
-        public void ToggleLayerVisibility(string layerId, bool status)
+        public void ToggleSpeckleLayerVisibility(string layerId, bool status)
         {
             //TODO: Implement
         }
 
-        public void ToggleLayerHover(string layerId, bool status)
+        public void ToggleSpeckleLayerHover(string layerId, bool status)
         {
             //TODO: Implement
         }

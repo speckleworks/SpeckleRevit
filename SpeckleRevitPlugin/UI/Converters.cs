@@ -10,7 +10,7 @@ namespace SpeckleRevitPlugin.UI
     /// <summary>
     /// 
     /// </summary>
-    public class SelectionChangedToSpeckleStreamConverter : IEventArgsConverter
+    public class SelectionChangedToDataStreamConverter : IEventArgsConverter
     {
         public object Convert(object value, object parameter)
         {

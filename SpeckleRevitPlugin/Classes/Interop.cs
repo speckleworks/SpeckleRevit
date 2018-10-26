@@ -358,7 +358,7 @@ namespace SpeckleRevitPlugin.Classes
             //TODO: Implement client baking
         }
 
-        public void BakeLayer(string clientId, string layerGuid)
+        public void BakeSpeckleLayer(string clientId, string layerGuid)
         {
             //TODO: Implement baking
         }
@@ -381,12 +381,12 @@ namespace SpeckleRevitPlugin.Classes
             myClient?.ToggleVisibility(status);
         }
 
-        public void SetLayerVisibility(string clientId, string layerId, bool status)
+        public void SetSpeckleLayerVisibility(string clientId, string layerId, bool status)
         {
             //TODO: create geometry previews
         }
 
-        public void SetLayerHover(string clientId, string layerId, bool status)
+        public void SetSpeckleLayerHover(string clientId, string layerId, bool status)
         {
             //TODO: highlight geometry previews
         }
@@ -457,10 +457,10 @@ namespace SpeckleRevitPlugin.Classes
 
         #region Sender Helpers
 
-        //public string getLayersAndObjectsInfo( bool ignoreSelection = false )
+        //public string getSpeckleLayersAndObjectsInfo( bool ignoreSelection = false )
         //{
         //  List<RhinoObject> SelectedObjects;
-        //  List<LayerSelection> layerInfoList = new List<LayerSelection>();
+        //  List<SpeckleLayerSelection> layerInfoList = new List<SpeckleLayerSelection>();
 
         //  if ( !ignoreSelection )
         //  {
@@ -474,9 +474,9 @@ namespace SpeckleRevitPlugin.Classes
         //    if ( SelectedObjects.Count == 0 || SelectedObjects[ 0 ] == null )
         //      return JsonConvert.SerializeObject( layerInfoList );
 
-        //    foreach ( Rhino.DocObjects.Layer ll in RhinoDoc.ActiveDoc.Layers )
+        //    foreach ( Rhino.DocObjects.SpeckleLayer ll in RhinoDoc.ActiveDoc.SpeckleLayers )
         //    {
-        //      layerInfoList.Add( new LayerSelection()
+        //      layerInfoList.Add( new SpeckleLayerSelection()
         //      {
         //        objectCount = 0,
         //        layerName = ll.FullPath,
@@ -487,11 +487,11 @@ namespace SpeckleRevitPlugin.Classes
         //    }
         //  }
 
-        //  SelectedObjects = SelectedObjects.OrderBy( o => o.Attributes.LayerIndex ).ToList();
+        //  SelectedObjects = SelectedObjects.OrderBy( o => o.Attributes.SpeckleLayerIndex ).ToList();
 
         //  foreach ( var obj in SelectedObjects )
         //  {
-        //    var layer = RhinoDoc.ActiveDoc.Layers[ obj.Attributes.LayerIndex ];
+        //    var layer = RhinoDoc.ActiveDoc.SpeckleLayers[ obj.Attributes.SpeckleLayerIndex ];
         //    var myLInfo = layerInfoList.FirstOrDefault( l => l.layerName == layer.FullPath );
 
         //    if ( myLInfo != null )
@@ -502,7 +502,7 @@ namespace SpeckleRevitPlugin.Classes
         //    }
         //    else
         //    {
-        //      var myNewLinfo = new LayerSelection()
+        //      var myNewLinfo = new SpeckleLayerSelection()
         //      {
         //        objectCount = 1,
         //        layerName = layer.FullPath,
@@ -520,9 +520,9 @@ namespace SpeckleRevitPlugin.Classes
     }
 
     [Serializable]
-    public class LayerSelection
+    public class SpeckleLayerSelection
     {
-        public string LayerName;
+        public string SpeckleLayerName;
         public int ObjectCount;
         public string Color;
         public List<string> ObjectGuids;

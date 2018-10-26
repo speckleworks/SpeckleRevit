@@ -10,7 +10,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="500">
     <UserControl.Resources>
-        <local:SelectionChangedToSpeckleStreamConverter x:Key="SelectionChangedToSpeckleStreamConverter"/>
+        <local:SelectionChangedToDataStreamConverter x:Key="SelectionChangedToDataStreamConverter"/>
     </UserControl.Resources>
     <Grid>
         <StackPanel Orientation="Vertical" 
@@ -27,21 +27,21 @@
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
                             <command:EventToCommand Command="{Binding StreamSelected, Mode=OneWay}" 
-                                                EventArgsConverter="{StaticResource SelectionChangedToSpeckleStreamConverter}"
+                                                EventArgsConverter="{StaticResource SelectionChangedToDataStreamConverter}"
                                                 PassEventArgsToCommand="True" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </ComboBox>
             </materialDesign:TransitioningContent>
             <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect SlideInFromBottom}">
-                <ComboBox x:Name="LayersComboBox" 
-                          ItemsSource="{Binding Layers}"
-                          SelectedItem="{Binding SelectedLayer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <ComboBox x:Name="SpeckleLayersComboBox" 
+                          ItemsSource="{Binding SpeckleLayers}"
+                          SelectedItem="{Binding SelectedSpeckleLayer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           DisplayMemberPath="Name"
                           Margin="0,6,0,0" 
                           Height="36"
                           VerticalAlignment="Top"
-                          materialDesign:HintAssist.Hint="Existing Layers">
+                          materialDesign:HintAssist.Hint="Existing SpeckleLayers">
                     </ComboBox>
             </materialDesign:TransitioningContent>
         </StackPanel>

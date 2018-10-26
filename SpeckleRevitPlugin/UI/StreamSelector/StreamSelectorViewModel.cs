@@ -14,31 +14,31 @@ namespace SpeckleRevitPlugin.UI.StreamSelector
         #region Properties
 
         public StreamSelectorModel Model { get; set; }
-        public RelayCommand<SpeckleStream> StreamSelected { get; set; }
+        public RelayCommand<DataStream> StreamSelected { get; set; }
 
-        private List<SpeckleStream> _streams = new List<SpeckleStream>();
-        public List<SpeckleStream> Streams
+        private List<DataStream> _streams = new List<DataStream>();
+        public List<DataStream> Streams
         {
             get { return _streams; }
             set { _streams = value; RaisePropertyChanged(() => Streams); }
         }
 
-        private SpeckleStream _selectedStream;
-        public SpeckleStream SelectedStream
+        private DataStream _selectedStream;
+        public DataStream SelectedStream
         {
             get { return _selectedStream; }
             set { _selectedStream = value; RaisePropertyChanged(() => SelectedStream); }
         }
 
-        private List<Layer> _layers = new List<Layer>();
-        public List<Layer> Layers
+        private List<SpeckleLayer> _layers = new List<SpeckleLayer>();
+        public List<SpeckleLayer> Layers
         {
             get { return _layers; }
             set { _layers = value; RaisePropertyChanged(() => Layers); }
         }
 
-        private Layer _selectedLayer;
-        public Layer SelectedLayer
+        private SpeckleLayer _selectedLayer;
+        public SpeckleLayer SelectedLayer
         {
             get { return _selectedLayer; }
             set { _selectedLayer = value; RaisePropertyChanged(() => SelectedLayer); }
@@ -50,7 +50,7 @@ namespace SpeckleRevitPlugin.UI.StreamSelector
         {
             Model = model;
             Streams = Model.GetStreams();
-            StreamSelected = new RelayCommand<SpeckleStream>(OnStreamSelected);
+            StreamSelected = new RelayCommand<DataStream>(OnStreamSelected);
         }
 
         #region Event Handlers
@@ -59,7 +59,7 @@ namespace SpeckleRevitPlugin.UI.StreamSelector
         /// 
         /// </summary>
         /// <param name="stream"></param>
-        private void OnStreamSelected(SpeckleStream stream)
+        private void OnStreamSelected(DataStream stream)
         {
             // (Konrad) It's possible for this to be null since we can hide the comboboxes
             if (stream == null) return;

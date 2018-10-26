@@ -24,7 +24,7 @@
                     <!--<i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
                             <command:EventToCommand Command="{Binding StreamSelected, Mode=OneWay}" 
-                                                EventArgsConverter="{StaticResource SelectionChangedToSpeckleStreamConverter}"
+                                                EventArgsConverter="{StaticResource SelectionChangedToDataStreamConverter}"
                                                 PassEventArgsToCommand="True" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>-->

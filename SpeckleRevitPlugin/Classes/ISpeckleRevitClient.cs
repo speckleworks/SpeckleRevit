@@ -17,9 +17,9 @@ namespace SpeckleRevitPlugin.Classes
 
         void ToggleVisibility(bool status);
 
-        void ToggleLayerVisibility(string layerId, bool status);
+        void ToggleSpeckleLayerVisibility(string layerId, bool status);
 
-        void ToggleLayerHover(string layerId, bool status);
+        void ToggleSpeckleLayerHover(string layerId, bool status);
 
         void Dispose(bool delete = false);
     }
