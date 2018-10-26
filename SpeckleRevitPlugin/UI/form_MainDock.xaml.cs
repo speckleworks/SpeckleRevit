@@ -1,79 +1,71 @@
 ﻿#region Namespaces
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
-using CefSharp;
-using Visibility = System.Windows.Visibility;
-using Path = System.IO.Path;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Windows;
+using Autodesk.Revit.UI;
+using CefSharp;
+using SpeckleRevitPlugin.Classes;
+using SpeckleRevitPlugin.Entry;
+
 #endregion
 
-namespace SpeckleRevitPlugin
+namespace SpeckleRevitPlugin.UI
 {
     /// <summary>
     /// Interaction logic for form_MainDock.xaml
     /// </summary>
-    public partial class form_MainDock : Page, IDockablePaneProvider
+    public partial class FormMainDock : IDockablePaneProvider
     {
-        private ExternalEvent _extEvent;
-        private ExtCmdModeless _handler = new ExtCmdModeless();
+        public static Interop Store;
 
         /// <summary>
         /// Main Dockable window
         /// </summary>
-        public form_MainDock()
+        public FormMainDock()
         {
             InitializeCef();
             InitializeComponent();
             InitializeChromium();
-            _extEvent = ExternalEvent.Create(_handler);
+
+            // initialise one store
+            Store = new Interop(Browser);
+
+            // make them talk together
+            Browser.RegisterAsyncJsObject("Interop", Store);
+
+            //_extEvent = ExternalEvent.Create(_handler);
         }
 
-
-        void InitializeCef()
+        private static void InitializeCef()
         {
-
             Cef.EnableHighDPISupport();
 
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
             var assemblyPath = Path.GetDirectoryName(assemblyLocation);
+            if (assemblyPath == null) return;
+
             var pathSubprocess = Path.Combine(assemblyPath, "CefSharp.BrowserSubprocess.exe");
             CefSharpSettings.LegacyJavascriptBindingEnabled = true;
             var settings = new CefSettings
             {
                 LogSeverity = LogSeverity.Verbose,
                 LogFile = "ceflog.txt",
-                BrowserSubprocessPath = pathSubprocess
+                BrowserSubprocessPath = pathSubprocess,
+                RemoteDebuggingPort = 8088
             };
 
             // Initialize cef with the provided settings
-
+            settings.CefCommandLineArgs.Add("allow-file-access-from-files", "1");
+            settings.CefCommandLineArgs.Add("disable-web-security", "1");
             Cef.Initialize(settings);
-
         }
         public void InitializeChromium()
         {
 
 #if DEBUG
-
-            Browser.Address = @"http://localhost:9090/";
+            Browser.Address = @"http://localhost:2020/";
 
 #else
             var path = Directory.GetParent(Assembly.GetExecutingAssembly().Location);
@@ -94,33 +86,48 @@ namespace SpeckleRevitPlugin
                 FileAccessFromFileUrls = CefState.Enabled,
                 UniversalAccessFromFileUrls = CefState.Enabled
             };
-
-
-            //Browser.Dock = DockStyle.Fill;
         }
 
 
         #region Form Events
+
+        /// <summary>
+        /// Can't show the Dev Tools panel until window finishes initialization.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form_MainDock_OnLoaded(object sender, RoutedEventArgs e)
+        {
+#if DEBUG
+            //Browser.ShowDevTools();
+#endif
+        }
+
         /// <summary>
         /// Safely raise an external command transaction event (for modeless)
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Button_ExampleTransaction_Click(object sender, RoutedEventArgs e)
+        /// <param name="args"></param>
+        private void Button_ExampleTransaction_Click(object sender, RoutedEventArgs args)
         {
             try
             {
                 //textBox_Comments.Text;
-                AppMain.Settings.CommandType = EnumCommandType.Command1;
+                //AppMain.Settings.CommandType = EnumCommandType.Command1;
 
                 // Safe Update
-                _extEvent.Raise();
+                //_extEvent.Raise();
             }
-            catch { }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
         }
+
         #endregion
 
         #region Dockable Pane
+
         /// <summary>
         /// IDockablePaneProvider Implementation
         /// </summary>
@@ -128,10 +135,13 @@ namespace SpeckleRevitPlugin
         public void SetupDockablePane(DockablePaneProviderData data)
         {
             data.FrameworkElement = this;
-            DockablePaneProviderData d = new DockablePaneProviderData();
-            data.InitialState = new DockablePaneState();
-            data.InitialState.DockPosition = DockPosition.Right;
+            var unused = new DockablePaneProviderData();
+            data.InitialState = new DockablePaneState
+            {
+                DockPosition = DockPosition.Right
+            };
         }
+
         #endregion
     }
 }

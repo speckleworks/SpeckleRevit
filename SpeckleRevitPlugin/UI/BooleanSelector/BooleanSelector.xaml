@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="SpeckleRevitPlugin.UI.BooleanSelector.BooleanSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" d:DesignWidth="500">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Label x:Name="Label1"
+               Content="No" 
+               VerticalAlignment="Top" 
+               HorizontalAlignment="Right"
+               FontSize="18"/>
+        <controls:ToggleSwitchButton Name="ToggleButton" 
+                                     Grid.Column="1" 
+                                     VerticalAlignment="Top" 
+                                     HorizontalAlignment="Center" 
+                                     Width="36" 
+                                     Height="36"
+                                     Style="{DynamicResource MaterialDesignSwitchToggleButton}">
+        </controls:ToggleSwitchButton>
+        <Label x:Name="Label2"
+               Grid.Column="2"
+               Content="Yes" 
+               VerticalAlignment="Top" 
+               HorizontalAlignment="Left" 
+               FontSize="18"/>
+    </Grid>
+</UserControl>

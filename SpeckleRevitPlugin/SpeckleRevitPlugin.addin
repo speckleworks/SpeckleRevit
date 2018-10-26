@@ -1,18 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RevitAddIns>
-  <AddIn Type="Command">
-    <Text>Command SpeckleRevitPlugin</Text>
-    <Description>Speckle plugin for Revit</Description>
-    <Assembly>.\Speckle\SpeckleRevitPlugin.dll</Assembly>
-    <FullClassName>SpeckleRevitPlugin.ExtCmd</FullClassName>
-    <ClientId>76028dcb-3f9b-4a5b-9e8b-36b7a5564a56</ClientId>
-    <VendorId>Speckle</VendorId>
-    <VendorDescription>http://speckle.works/</VendorDescription>
-  </AddIn>
   <AddIn Type="Application">
     <Name>Application SpeckleRevitPlugin</Name>
-    <Assembly>.\Speckle\SpeckleRevitPlugin.dll</Assembly>
-    <FullClassName>SpeckleRevitPlugin.AppMain</FullClassName>
+    <Assembly>Speckle\SpeckleRevitPlugin.dll</Assembly>
+    <FullClassName>SpeckleRevitPlugin.Entry.AppMain</FullClassName>
     <ClientId>0a03f52e-0ee0-4c19-82c4-8181626ec816</ClientId>
     <VendorId>Speckle</VendorId>
     <VendorDescription>http://speckle.works/</VendorDescription>

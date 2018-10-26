@@ -1,18 +1,6 @@
 ﻿#region Namespaces
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 #endregion
 
 namespace SpeckleRevitPlugin
@@ -20,17 +8,17 @@ namespace SpeckleRevitPlugin
     /// <summary>
     /// Interaction logic for form_Main.xaml
     /// </summary>
-    public partial class form_Main : Window
+    public partial class form_Main
     {
-        private SettingsHelper _s;
+        //private SettingsHelper _s;
 
-        public form_Main(SettingsHelper s)
+        public form_Main()
         {
             InitializeComponent();
             Label_Version.Content = "v." + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             //widen scope
-            _s = s;
+            //_s = s;
         }
 
         #region Form Events
@@ -41,7 +29,7 @@ namespace SpeckleRevitPlugin
         /// <param name="e"></param>
         private void Button_Close_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         /// <summary>
@@ -61,8 +49,7 @@ namespace SpeckleRevitPlugin
         /// <param name="e"></param>
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
-                this.DragMove();
+            if (e.ChangedButton == MouseButton.Left) DragMove();
         }
         #endregion
     }
